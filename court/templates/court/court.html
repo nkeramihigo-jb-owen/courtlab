@@ -1,638 +1,623 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
 
 
-<title>CourtLab — Basketball Play Simulator</title>
-
+<title>CourtLab — Play Designer</title>
 
 <style>
+
+    /* =========================================================
+       ROOT / GLOBAL
+    ========================================================= */
+
+    :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --line: #334155;
+        --muted: #94a3b8;
+
+        --blue: #3b82f6;
+        --green: #22c55e;
+        --red: #ef4444;
+        --orange: #f97316;
+
+        color-scheme: dark;
+    }
+
+    html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+    }
+
     * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+
+        -webkit-tap-highlight-color: transparent;
     }
 
     body {
         min-height: 100vh;
-        background: #111827;
-        font-family: Arial, Helvetica, sans-serif;
-        color: white;
-        padding: 30px;
+
+        background: var(--bg);
+        color: #f1f5f9;
+
+        font: 15px/1.4 system-ui, Segoe UI, Arial, sans-serif;
+
+        padding: 24px;
+
+        padding-top: max(
+            24px,
+            env(safe-area-inset-top, 0px)
+        );
+
+        padding-bottom: max(
+            24px,
+            env(safe-area-inset-bottom, 0px)
+        );
     }
 
     .app {
-        width: min(1200px, 100%);
+        max-width: 1100px;
         margin: auto;
+
+        display: grid;
+        gap: 14px;
     }
 
-    .header {
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 20px;
-        margin-bottom: 20px;
+
+        gap: 16px;
+        flex-wrap: wrap;
     }
 
-    .brand h1 {
-        font-size: 30px;
-        margin-bottom: 5px;
+    h1 {
+        font-size: 28px;
     }
 
-    .brand p {
-        color: #9ca3af;
+    header p {
+        color: var(--muted);
         font-size: 14px;
     }
 
-    .controls {
+
+    /* =========================================================
+       GENERAL ROW / BUTTONS
+    ========================================================= */
+
+    .row {
         display: flex;
+        align-items: center;
         gap: 8px;
         flex-wrap: wrap;
     }
 
     button {
-        border: none;
-        padding: 11px 18px;
+        border: 0;
         border-radius: 8px;
+
+        padding: 10px 16px;
+
+        font-weight: 700;
+
+        color: #fff;
+        background: var(--line);
+
         cursor: pointer;
-        font-weight: bold;
-        background: #374151;
-        color: white;
     }
 
-    button:hover {
-        background: #4b5563;
-    }
-
-    button.active {
-        background: #2563eb;
-    }
-
-    button.recording {
-        background: #dc2626;
-    }
-
-    button.dribbling {
-        background: #16a34a;
+    button:hover:not(:disabled) {
+        background: #475569;
     }
 
     button:disabled {
-        opacity: 0.45;
+        opacity: 0.4;
         cursor: not-allowed;
     }
 
-    .court-wrapper {
-        width: 100%;
-        background: #1f2937;
-        padding: 15px;
-        border-radius: 16px;
+    button:focus-visible,
+    input:focus-visible {
+        outline: 2px solid #93c5fd;
+        outline-offset: 2px;
     }
 
-    .court {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 94 / 50;
-        background: #d89a55;
-        border: 4px solid white;
-        overflow: hidden;
-        user-select: none;
-        touch-action: none;
+    button.on {
+        background: var(--blue);
     }
 
-
-    /* ==========================================
-       COURT MARKINGS
-       ========================================== */
-
-    .half-court-line {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: white;
-        transform: translateX(-50%);
-    }
-
-    .center-circle {
-        position: absolute;
-        width: 18%;
-        aspect-ratio: 1;
-        border: 3px solid white;
-        border-radius: 50%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .center-dot {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background: white;
-        border-radius: 50%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-
-    /* ==========================================
-       PAINT
-       ========================================== */
-
-    .paint-left,
-    .paint-right {
-        position: absolute;
-        width: 18%;
-        height: 40%;
-        top: 30%;
-        border: 3px solid white;
-    }
-
-    .paint-left {
-        left: 0;
-    }
-
-    .paint-right {
-        right: 0;
-    }
-
-
-    /* ==========================================
-       FREE THROW CIRCLES
-       ========================================== */
-
-    .free-circle-left,
-    .free-circle-right {
-        position: absolute;
-        width: 14%;
-        aspect-ratio: 1;
-        border: 3px solid white;
-        border-radius: 50%;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .free-circle-left {
-        left: 11%;
-    }
-
-    .free-circle-right {
-        right: 11%;
-    }
-
-
-    /* ==========================================
-       THREE POINT LINES
-       ========================================== */
-
-    .three-point-left,
-    .three-point-right {
-        position: absolute;
-        width: 42%;
-        height: 88%;
-        top: 6%;
-        border: 3px solid white;
-        border-radius: 50%;
-    }
-
-    .three-point-left {
-        left: -21%;
-    }
-
-    .three-point-right {
-        right: -21%;
-    }
-
-
-    /* ==========================================
-       BASKETS
-       ========================================== */
-
-    .basket-left,
-    .basket-right {
-        position: absolute;
-        width: 28px;
-        height: 28px;
-        border: 4px solid #ef4444;
-        border-radius: 50%;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 3;
-    }
-
-    .basket-left {
-        left: 1%;
-    }
-
-    .basket-right {
-        right: 1%;
-    }
-
-
-    /* ==========================================
-       HALF COURT
-       ========================================== */
-
-    .court.half-court {
-        width: min(
-            100%,
-            calc((100vh - 330px) * 0.94)
-        );
-
-        aspect-ratio: 47 / 50;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .court.half-court .half-court-line,
-    .court.half-court .center-circle,
-    .court.half-court .center-dot,
-    .court.half-court .paint-right,
-    .court.half-court .free-circle-right,
-    .court.half-court .three-point-right,
-    .court.half-court .basket-right {
-        display: none;
-    }
-
-    .court.half-court .paint-left {
-        width: 36%;
-    }
-
-    .court.half-court .free-circle-left {
-        left: 22%;
-    }
-
-    .court.half-court .three-point-left {
-        width: 84%;
-        height: 88%;
-        left: -42%;
-    }
-
-
-    /* ==========================================
-       PLAYERS
-       ========================================== */
-
-    .player {
-        position: absolute;
-
-        width: 44px;
-        height: 44px;
-
-        border-radius: 50%;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        font-size: 13px;
-        font-weight: bold;
-
-        cursor: grab;
-
-        z-index: 10;
-
-        transform: translate(-50%, -50%);
-
-        border: 3px solid white;
-
-        box-shadow:
-            0 4px 10px rgba(0, 0, 0, 0.35);
-
-        touch-action: none;
-    }
-
-    .player:active {
-        cursor: grabbing;
-    }
-
-    .offense {
-        background: #16a34a;
-    }
-
-    .defense {
+    button.rec {
         background: #dc2626;
     }
 
-    .player.selected {
-        box-shadow:
-            0 0 0 4px rgba(255, 255, 255, 0.55),
-            0 6px 15px rgba(0, 0, 0, 0.4);
-    }
-
-    .player.ball-handler {
-        box-shadow:
-            0 0 0 4px #f97316,
-            0 0 0 7px rgba(249, 115, 22, 0.25),
-            0 6px 15px rgba(0, 0, 0, 0.4);
+    button.good {
+        background: #16a34a;
     }
 
 
-    /* ==========================================
-       BALL
-       ========================================== */
+    /* =========================================================
+       PANELS
+    ========================================================= */
 
-    .ball {
+    .panel {
+        background: var(--card);
+        border-radius: 14px;
+
+        padding: 14px;
+    }
+
+
+    /* =========================================================
+       BASKETBALL COURT
+       
+       Court markings are drawn using ONE SVG.
+       This avoids CSS border / transform rendering problems.
+    ========================================================= */
+
+    .court {
+        position: relative;
+
+        width: 100%;
+        aspect-ratio: 94 / 50;
+
+        margin: auto;
+
+        border-radius: 6px;
+
+        overflow: hidden;
+
+        background: #d99a55;
+
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .court.half {
+        width: min(
+            100%,
+            calc((100vh - 320px) * 0.94)
+        );
+
+        aspect-ratio: 47 / 50;
+    }
+
+
+    /* =========================================================
+       COURT SVG
+    ========================================================= */
+
+    .court svg {
         position: absolute;
 
-        width: 25px;
-        height: 25px;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        pointer-events: none;
+    }
+
+    .court svg * {
+        fill: none;
+
+        stroke: #fff;
+        stroke-width: 2.5;
+
+        vector-effect: non-scaling-stroke;
+    }
+
+    .court svg .solid {
+        fill: #fff;
+        stroke: none;
+    }
+
+    .court svg .hoop {
+        stroke: #ef4444;
+        stroke-width: 3.5;
+    }
+
+    .court.half .full-only {
+        display: none;
+    }
+
+
+    /* =========================================================
+       PLAYER / BALL TOKENS
+    ========================================================= */
+
+    .tok {
+        position: absolute;
+
+        transform: translate(-50%, -50%);
 
         border-radius: 50%;
 
-        background: #f97316;
+        cursor: grab;
+
+        touch-action: none;
+    }
+
+    .tok:active {
+        cursor: grabbing;
+    }
+
+
+    /* =========================================================
+       PLAYERS
+    ========================================================= */
+
+    .player {
+        width: 44px;
+        height: 44px;
+
+        display: grid;
+        place-items: center;
+
+        font: 700 13px system-ui;
+
+        border: 3px solid #fff;
+
+        z-index: 10;
+
+        box-shadow:
+            0 4px 10px #0006;
+    }
+
+    .o {
+        background: #16a34a;
+    }
+
+    .d {
+        background: #dc2626;
+    }
+
+
+    /* =========================================================
+       BALL
+    ========================================================= */
+
+    .ball {
+        width: 24px;
+        height: 24px;
+
+        background: var(--orange);
 
         border: 2px solid #7c2d12;
 
         z-index: 20;
-
-        cursor: grab;
-
-        transform: translate(-50%, -50%);
-
-        touch-action: none;
     }
 
-    .ball::before {
+    .ball::after {
         content: "";
 
         position: absolute;
 
-        width: 48px;
-        height: 48px;
-
-        left: 50%;
-        top: 50%;
-
-        transform: translate(-50%, -50%);
+        inset: -10px;
     }
 
-    .ball.selected {
+
+    /* =========================================================
+       TOKEN STATES
+    ========================================================= */
+
+    .tok.drag {
         box-shadow:
-            0 0 0 4px rgba(255, 255, 255, 0.5),
-            0 5px 12px rgba(0, 0, 0, 0.4);
+            0 0 0 4px #ffffff88,
+            0 6px 14px #0006;
+    }
+
+    .player.handler {
+        box-shadow:
+            0 0 0 4px var(--orange),
+            0 6px 14px #0006;
     }
 
 
-    /* ==========================================
-       INFO
-       ========================================== */
-
-    .info-panel {
-        margin-top: 15px;
-
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        flex-wrap: wrap;
-        gap: 15px;
-
-        background: #1f2937;
-
-        padding: 15px;
-
-        border-radius: 12px;
-    }
+    /* =========================================================
+       LEGEND / STATUS
+    ========================================================= */
 
     .legend {
         display: flex;
-        gap: 18px;
         align-items: center;
+
+        gap: 16px;
         flex-wrap: wrap;
-    }
 
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-
+        color: #cbd5e1;
         font-size: 14px;
-        color: #d1d5db;
     }
 
-    .legend-dot {
-        width: 14px;
-        height: 14px;
+    .legend i {
+        display: inline-block;
+
+        width: 12px;
+        height: 12px;
+
         border-radius: 50%;
+
+        margin-right: 6px;
+
+        vertical-align: -1px;
     }
 
-    .green {
-        background: #16a34a;
-    }
-
-    .red {
-        background: #dc2626;
-    }
-
-    .orange {
-        background: #f97316;
-    }
-
-    .status {
-        color: #9ca3af;
-        font-size: 14px;
-    }
-
-
-    /* ==========================================
-       RECORDING PANEL
-       ========================================== */
-
-    .recording-panel {
-        margin-top: 15px;
-
-        background: #1f2937;
-
-        padding: 18px;
-
-        border-radius: 12px;
-    }
-
-    .recording-header {
+    .info {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 15px;
+
+        gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: 15px;
-    }
 
-    .recording-title {
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .recording-time {
-        color: #9ca3af;
+        color: var(--muted);
         font-size: 14px;
-        margin-top: 4px;
     }
 
-    .play-name-row {
+
+    /* =========================================================
+       RECORDING HEADER
+    ========================================================= */
+
+    .top {
         display: flex;
-        gap: 8px;
+        justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
+
+        gap: 12px;
+        flex-wrap: wrap;
+
+        margin-bottom: 12px;
     }
 
-    .play-name-row label {
+    .top b {
+        font-size: 17px;
+    }
+
+    #clock {
+        color: var(--muted);
         font-size: 14px;
-        color: #d1d5db;
-        font-weight: bold;
-        white-space: nowrap;
     }
 
-    .play-name-input {
+
+    /* =========================================================
+       RECORDING INDICATOR
+    ========================================================= */
+
+    #dot {
+        display: none;
+
+        align-items: center;
+        gap: 6px;
+
+        color: #fca5a5;
+
+        font-size: 13px;
+    }
+
+    #dot.on {
+        display: inline-flex;
+    }
+
+    #dot::before {
+        content: "";
+
+        width: 9px;
+        height: 9px;
+
+        border-radius: 50%;
+
+        background: var(--red);
+
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        #dot::before {
+            animation: none;
+        }
+
+    }
+
+
+    /* =========================================================
+       PLAY NAME
+    ========================================================= */
+
+    .name {
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        margin-bottom: 12px;
+    }
+
+    .name input {
         flex: 1;
         min-width: 0;
 
-        background: #111827;
-        color: white;
+        background: var(--bg);
+        color: #fff;
 
-        border: 1px solid #374151;
+        border: 1px solid var(--line);
         border-radius: 8px;
 
-        padding: 11px 12px;
-
-        outline: none;
+        padding: 10px 12px;
     }
 
-    .play-name-input:focus {
-        border-color: #2563eb;
+
+    /* =========================================================
+       PLAYBACK PROGRESS
+    ========================================================= */
+
+    .bar {
+        height: 5px;
+
+        background: var(--line);
+
+        border-radius: 9px;
+
+        overflow: hidden;
+
+        margin: 12px 0;
     }
 
-    .recording-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        color: #fca5a5;
-        font-size: 13px;
+    .bar div {
+        height: 100%;
+        width: 0;
+
+        background: var(--blue);
     }
 
-    .recording-dot {
-        width: 9px;
-        height: 9px;
-        background: #ef4444;
-        border-radius: 50%;
-        animation: recordingPulse 1s infinite;
-    }
 
-    @keyframes recordingPulse {
-        0% {
-            opacity: 1;
-        }
+    /* =========================================================
+       TIMELINE / LIST
+    ========================================================= */
 
-        50% {
-            opacity: 0.35;
-        }
+    .list {
+        background: var(--bg);
 
-        100% {
-            opacity: 1;
-        }
-    }
-
-    .recording-controls {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .timeline {
-        background: #111827;
         border-radius: 8px;
-        padding: 12px;
-        max-height: 220px;
-        overflow-y: auto;
-        margin-top: 15px;
+
+        padding: 8px 10px;
+
+        margin-top: 10px;
     }
 
-    .timeline-empty {
-        color: #6b7280;
-        font-size: 14px;
+    #timeline {
+        max-height: 210px;
+        overflow: auto;
+    }
+
+    .empty {
+        color: #64748b;
+
         text-align: center;
-        padding: 15px;
+
+        padding: 12px;
+
+        font-size: 14px;
     }
 
-    .timeline-item {
+    .ev {
+        display: flex;
+
+        gap: 14px;
+
+        padding: 7px 4px;
+
+        border-bottom: 1px solid var(--line);
+
+        font-size: 13px;
+
+        color: #cbd5e1;
+    }
+
+    .ev:last-child {
+        border: 0;
+    }
+
+    .ev time {
+        color: #60a5fa;
+
+        min-width: 50px;
+    }
+
+    .ev b {
+        color: #fff;
+    }
+
+    .ev span {
+        flex: 1;
+
+        color: var(--muted);
+    }
+
+    .title {
+        color: #60a5fa;
+
+        font-weight: 700;
+
+        font-size: 13px;
+
+        padding: 4px;
+    }
+
+
+    /* =========================================================
+       SAVED PLAYS
+    ========================================================= */
+
+    .saved {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 15px;
 
-        padding: 9px 10px;
+        gap: 10px;
 
-        border-bottom: 1px solid #374151;
+        padding: 8px 4px;
 
-        color: #d1d5db;
-
-        font-size: 13px;
+        border-bottom: 1px solid var(--line);
     }
 
-    .timeline-item:last-child {
-        border-bottom: none;
+    .saved:last-child {
+        border: 0;
     }
 
-    .timeline-player {
-        font-weight: bold;
-        color: white;
-    }
+    .saved strong {
+        min-width: 0;
 
-    .timeline-time {
-        color: #60a5fa;
-        min-width: 55px;
-    }
-
-    .timeline-action {
-        color: #9ca3af;
-        flex: 1;
-    }
-
-    .play-title-display {
-        color: #60a5fa;
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    .playback-progress {
-        width: 100%;
-        height: 5px;
-        background: #374151;
-        border-radius: 10px;
         overflow: hidden;
-        margin-top: 12px;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+
+        color: #cbd5e1;
     }
 
-    .playback-progress-bar {
-        width: 0%;
-        height: 100%;
-        background: #2563eb;
-        transition: width 0.05s linear;
-    }
 
-
-    /* ==========================================
+    /* =========================================================
        FOOTER
-       ========================================== */
+    ========================================================= */
 
-    .footer {
+    footer {
         text-align: center;
-        color: #6b7280;
+
+        color: #64748b;
+
         font-size: 12px;
-        margin-top: 25px;
+
+        margin-top: 8px;
     }
 
 
-    /* ==========================================
+    /* =========================================================
        MOBILE
-       ========================================== */
+    ========================================================= */
 
     @media (max-width: 700px) {
 
@@ -640,18 +625,10 @@
             padding: 12px;
         }
 
-        .header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .court.half-court {
-            width: 100%;
-        }
-
         .player {
             width: 34px;
             height: 34px;
+
             font-size: 10px;
         }
 
@@ -660,26 +637,251 @@
             height: 20px;
         }
 
-        .ball::before {
-            width: 42px;
-            height: 42px;
-        }
-
-        .play-name-row {
-            align-items: stretch;
+        .name {
             flex-direction: column;
+
+            align-items: stretch;
         }
 
-        .play-name-input {
-            width: 100%;
-        }
-
-        .timeline-item {
-            align-items: flex-start;
-        }
     }
 
+    /* =========================================================
+MOBILE LANDSCAPE / GAMING MODE
+When the phone is tilted sideways, CourtLab becomes
+a wide basketball play-design interface.
+========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+
+body {
+    padding: 8px;
+}
+
+.app {
+    width: 100%;
+    max-width: none;
+    gap: 8px;
+}
+
+/* Keep the header compact */
+header {
+    gap: 8px;
+}
+
+h1 {
+    font-size: 21px;
+}
+
+header p {
+    display: none;
+}
+
+header .row {
+    gap: 5px;
+}
+
+header button {
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   COURT BECOMES THE MAIN SCREEN
+===================================================== */
+
+.panel {
+    padding: 8px;
+    border-radius: 10px;
+}
+
+.court {
+    width: 100%;
+    max-width: none;
+
+    /*
+       Landscape screens are wide, so use almost
+       the entire available width.
+    */
+    aspect-ratio: 94 / 50;
+}
+
+
+/* =====================================================
+   PLAYERS
+===================================================== */
+
+.player {
+    width: 38px;
+    height: 38px;
+
+    font-size: 10px;
+}
+
+.ball {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* =====================================================
+   INFO BAR
+===================================================== */
+
+.info {
+    padding: 7px 10px;
+
+    font-size: 12px;
+}
+
+.legend {
+    gap: 10px;
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   RECORDING PANEL
+===================================================== */
+
+.top {
+    margin-bottom: 7px;
+}
+
+.top b {
+    font-size: 14px;
+}
+
+#clock {
+    font-size: 12px;
+}
+
+.name {
+    margin-bottom: 7px;
+}
+
+.name label {
+    font-size: 12px;
+}
+
+.name input {
+    padding: 7px 9px;
+    font-size: 12px;
+}
+
+.row {
+    gap: 5px;
+}
+
+button {
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+#timeline {
+    max-height: 120px;
+}
+
+
+/* =====================================================
+   SAVED PLAYS
+===================================================== */
+
+.saved {
+    padding: 6px 4px;
+}
+
+.saved button {
+    padding: 6px 9px;
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer {
+    display: none;
+}
+
+
+}
+
+/* =========================================================
+VERY SHORT LANDSCAPE PHONES
+========================================================= */
+
+@media (max-width: 900px)
+and (orientation: landscape)
+and (max-height: 500px) {
+
+
+body {
+    padding: 4px;
+}
+
+.app {
+    gap: 5px;
+}
+
+header {
+    min-height: 38px;
+}
+
+h1 {
+    font-size: 18px;
+}
+
+header button {
+    padding: 5px 8px;
+    font-size: 11px;
+}
+
+.panel {
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.player {
+    width: 32px;
+    height: 32px;
+    font-size: 9px;
+}
+
+.ball {
+    width: 18px;
+    height: 18px;
+}
+
+.info {
+    padding: 5px 8px;
+}
+
+.name {
+    margin-bottom: 5px;
+}
+
+.name input {
+    padding: 6px 8px;
+}
+
+button {
+    padding: 6px 8px;
+    font-size: 11px;
+}
+
+#timeline {
+    max-height: 80px;
+}
+
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -688,9 +890,13 @@
 <div class="app">
 
 
-<div class="header">
+<!-- =========================================================
+     HEADER
+========================================================== -->
 
-    <div class="brand">
+<header>
+
+    <div>
 
         <h1>🏀 CourtLab</h1>
 
@@ -700,33 +906,26 @@
 
     </div>
 
-    <div class="controls">
+
+    <div class="row">
 
         <button
-            id="fullCourtBtn"
-            class="active"
-            type="button"
+            id="bFull"
+            class="on"
         >
             Full Court
         </button>
 
-        <button
-            id="halfCourtBtn"
-            type="button"
-        >
+        <button id="bHalf">
             Half Court
         </button>
 
-        <button
-            id="resetBtn"
-            type="button"
-        >
+        <button id="bReset">
             Reset
         </button>
 
         <button
-            id="playBtn"
-            type="button"
+            id="bPlay"
             disabled
         >
             ▶ Play
@@ -734,135 +933,225 @@
 
     </div>
 
-</div>
+</header>
 
 
-<div class="court-wrapper">
+<!-- =========================================================
+     COURT
+========================================================== -->
+
+<div class="panel">
 
     <div
         class="court"
         id="court"
     >
 
-        <div class="half-court-line"></div>
+        <!-- =================================================
+             COURT MARKINGS
+        ================================================== -->
 
-        <div class="center-circle"></div>
+        <svg
+            viewBox="0 0 94 50"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+        >
 
-        <div class="center-dot"></div>
+            <!-- LEFT HALF -->
+
+            <rect
+                x="0"
+                y="17"
+                width="19"
+                height="16"
+            />
+
+            <circle
+                cx="19"
+                cy="25"
+                r="6"
+            />
+
+            <path
+                d="M0 3H14.2A23.75 23.75 0 0 1 14.2 47H0"
+            />
+
+            <line
+                x1="4"
+                y1="22"
+                x2="4"
+                y2="28"
+            />
+
+            <circle
+                class="hoop"
+                cx="5.25"
+                cy="25"
+                r="0.9"
+            />
 
 
-        <div class="paint-left"></div>
+            <!-- CENTER + RIGHT HALF -->
 
-        <div class="paint-right"></div>
+            <g class="full-only">
+
+                <line
+                    x1="47"
+                    y1="0"
+                    x2="47"
+                    y2="50"
+                />
+
+                <circle
+                    cx="47"
+                    cy="25"
+                    r="6"
+                />
+
+                <circle
+                    class="solid"
+                    cx="47"
+                    cy="25"
+                    r="0.4"
+                />
 
 
-        <div class="free-circle-left"></div>
+                <!-- RIGHT PAINT -->
 
-        <div class="free-circle-right"></div>
+                <rect
+                    x="75"
+                    y="17"
+                    width="19"
+                    height="16"
+                />
+
+                <circle
+                    cx="75"
+                    cy="25"
+                    r="6"
+                />
+
+                <path
+                    d="M94 3H79.8A23.75 23.75 0 0 0 79.8 47H94"
+                />
+
+                <line
+                    x1="90"
+                    y1="22"
+                    x2="90"
+                    y2="28"
+                />
+
+                <circle
+                    class="hoop"
+                    cx="88.75"
+                    cy="25"
+                    r="0.9"
+                />
+
+            </g>
+
+        </svg>
 
 
-        <div class="three-point-left"></div>
-
-        <div class="three-point-right"></div>
-
-
-        <div class="basket-left"></div>
-
-        <div class="basket-right"></div>
-
-
-        <!-- OFFENSE -->
+        <!-- =================================================
+             OFFENSIVE PLAYERS
+        ================================================== -->
 
         <div
-            class="player offense"
-            data-player="1"
-            style="left:25%;top:50%;"
+            class="tok player o"
+            data-id="1"
+            style="left:25%;top:50%"
         >
             1
         </div>
 
         <div
-            class="player offense"
-            data-player="2"
-            style="left:32%;top:25%;"
+            class="tok player o"
+            data-id="2"
+            style="left:32%;top:25%"
         >
             2
         </div>
 
         <div
-            class="player offense"
-            data-player="3"
-            style="left:32%;top:75%;"
+            class="tok player o"
+            data-id="3"
+            style="left:32%;top:75%"
         >
             3
         </div>
 
         <div
-            class="player offense"
-            data-player="4"
-            style="left:43%;top:35%;"
+            class="tok player o"
+            data-id="4"
+            style="left:43%;top:35%"
         >
             4
         </div>
 
         <div
-            class="player offense"
-            data-player="5"
-            style="left:43%;top:65%;"
+            class="tok player o"
+            data-id="5"
+            style="left:43%;top:65%"
         >
             5
         </div>
 
 
-        <!-- DEFENSE -->
+        <!-- =================================================
+             DEFENSIVE PLAYERS
+        ================================================== -->
 
         <div
-            class="player defense"
-            data-player="D1"
-            style="left:31%;top:50%;"
+            class="tok player d"
+            data-id="D1"
+            style="left:31%;top:50%"
         >
             D1
         </div>
 
         <div
-            class="player defense"
-            data-player="D2"
-            style="left:39%;top:22%;"
+            class="tok player d"
+            data-id="D2"
+            style="left:39%;top:22%"
         >
             D2
         </div>
 
         <div
-            class="player defense"
-            data-player="D3"
-            style="left:39%;top:78%;"
+            class="tok player d"
+            data-id="D3"
+            style="left:39%;top:78%"
         >
             D3
         </div>
 
         <div
-            class="player defense"
-            data-player="D4"
-            style="left:51%;top:35%;"
+            class="tok player d"
+            data-id="D4"
+            style="left:51%;top:35%"
         >
             D4
         </div>
 
         <div
-            class="player defense"
-            data-player="D5"
-            style="left:51%;top:65%;"
+            class="tok player d"
+            data-id="D5"
+            style="left:51%;top:65%"
         >
             D5
         </div>
 
 
-        <!-- BALL -->
+        <!-- =================================================
+             BALL
+        ================================================== -->
 
         <div
-            class="ball"
+            class="tok ball"
             id="ball"
-            style="left:25%;top:50%;"
+            style="left:25%;top:50%"
         ></div>
 
     </div>
@@ -870,66 +1159,61 @@
 </div>
 
 
-<!-- INFO -->
+<!-- =========================================================
+     INFO / LEGEND
+========================================================== -->
 
-<div class="info-panel">
+<div class="panel info">
 
     <div class="legend">
 
-        <div class="legend-item">
-            <span class="legend-dot green"></span>
+        <span>
+            <i style="background:var(--green)"></i>
             Offense
-        </div>
+        </span>
 
-        <div class="legend-item">
-            <span class="legend-dot red"></span>
+        <span>
+            <i style="background:var(--red)"></i>
             Defense
-        </div>
+        </span>
 
-        <div class="legend-item">
-            <span class="legend-dot orange"></span>
+        <span>
+            <i style="background:var(--orange)"></i>
             Ball
-        </div>
+        </span>
 
     </div>
 
-    <div
-        class="status"
-        id="status"
-    >
-        Full court — tap a player, then press Dribble.
+
+    <div id="status">
+        Full court — drag players or the ball.
     </div>
 
 </div>
 
 
-<!-- RECORDING PANEL -->
+<!-- =========================================================
+     PLAY RECORDING PANEL
+========================================================== -->
 
-<div class="recording-panel">
+<div class="panel">
 
-    <div class="recording-header">
+    <!-- RECORDING HEADER -->
+
+    <div class="top">
 
         <div>
 
-            <div class="recording-title">
-                🎬 Play Recording
-            </div>
+            <b>🎬 Play Recording</b>
 
-            <div
-                class="recording-time"
-                id="recordingTime"
-            >
+            <div id="clock">
                 0.0s
             </div>
 
         </div>
 
-        <div
-            id="recordingIndicator"
-            class="recording-indicator"
-            style="display:none;"
-        >
-            <span class="recording-dot"></span>
+
+        <div id="dot">
             Recording
         </div>
 
@@ -938,18 +1222,16 @@
 
     <!-- PLAY NAME -->
 
-    <div class="play-name-row">
+    <div class="name">
 
-        <label for="playName">
-            Play Name
+        <label for="name">
+            <b>Play Name</b>
         </label>
 
         <input
-            type="text"
-            id="playName"
-            class="play-name-input"
-            placeholder="Example: Horns Entry"
+            id="name"
             maxlength="80"
+            placeholder="Example: Horns Entry"
         >
 
     </div>
@@ -958,14 +1240,11 @@
     <!-- DRIBBLE -->
 
     <div
-        class="recording-controls"
-        style="margin-bottom:10px;"
+        class="row"
+        style="margin-bottom:8px"
     >
 
-        <button
-            id="dribbleBtn"
-            type="button"
-        >
+        <button id="bDrib">
             🏀 Dribble
         </button>
 
@@ -974,860 +1253,519 @@
 
     <!-- RECORDING CONTROLS -->
 
-    <div class="recording-controls">
+    <div class="row">
 
-        <button
-            id="recordBtn"
-            type="button"
-        >
+        <button id="bRec">
             🔴 Record
         </button>
 
         <button
-            id="stopBtn"
-            type="button"
+            id="bStop"
             disabled
         >
             ⏹ Stop
         </button>
 
         <button
-            id="restartBtn"
-            type="button"
+            id="bRestart"
             disabled
         >
             ↩ Restart
         </button>
 
         <button
-            id="pauseBtn"
-            type="button"
+            id="bPause"
             disabled
         >
             ⏸ Pause
         </button>
 
         <button
-            id="clearBtn"
-            type="button"
+            id="bClear"
             disabled
         >
             Clear Recording
         </button>
 
-    </div>
-
-
-    <div class="playback-progress">
-
-        <div
-            class="playback-progress-bar"
-            id="playbackProgress"
-        ></div>
+        <button
+            id="bSave"
+            class="good"
+            disabled
+        >
+            💾 Save Recording
+        </button>
 
     </div>
 
+
+    <!-- PLAYBACK PROGRESS -->
+
+    <div class="bar">
+
+        <div id="prog"></div>
+
+    </div>
+
+
+    <!-- TIMELINE -->
 
     <div
-        class="timeline"
+        class="list"
         id="timeline"
-    >
+    ></div>
 
-        <div class="timeline-empty">
-            No play recorded yet.
-            Press Record and start moving players.
-        </div>
+
+    <!-- SAVED PLAYS -->
+
+    <div class="list">
+
+        <b style="font-size:14px">
+            📚 Saved Plays
+        </b>
+
+        <div id="saved"></div>
 
     </div>
 
 </div>
 
 
-<div class="footer">
+<!-- =========================================================
+     FOOTER
+========================================================== -->
+
+<footer>
     CourtLab • Built by nkeramihigo-jb-owen
-</div>
+</footer>
 
 
 </div>
 
 <script>
 
-    /*
-    ==========================================
-    COURT ELEMENTS
-    ==========================================
-    */
+    /* =========================================================
+       DOM REFERENCES
+    ========================================================= */
 
-    const court =
-        document.getElementById("court");
+    const $ = id => document.getElementById(id);
 
-    const players =
-        document.querySelectorAll(".player");
+    const court = $("court");
+    const ball = $("ball");
+    const statusEl = $("status");
 
-    const ball =
-        document.getElementById("ball");
+    const tokens = [
+        ...court.querySelectorAll(".tok")
+    ];
 
-    const resetBtn =
-        document.getElementById("resetBtn");
-
-    const playBtn =
-        document.getElementById("playBtn");
-
-    const fullCourtBtn =
-        document.getElementById("fullCourtBtn");
-
-    const halfCourtBtn =
-        document.getElementById("halfCourtBtn");
-
-    const status =
-        document.getElementById("status");
-
-    const recordBtn =
-        document.getElementById("recordBtn");
-
-    const stopBtn =
-        document.getElementById("stopBtn");
-
-    const restartBtn =
-        document.getElementById("restartBtn");
-
-    const pauseBtn =
-        document.getElementById("pauseBtn");
-
-    const clearBtn =
-        document.getElementById("clearBtn");
-
-    const dribbleBtn =
-        document.getElementById("dribbleBtn");
-
-    const playName =
-        document.getElementById("playName");
-
-    const timeline =
-        document.getElementById("timeline");
-
-    const recordingTime =
-        document.getElementById("recordingTime");
-
-    const recordingIndicator =
-        document.getElementById("recordingIndicator");
-
-    const playbackProgress =
-        document.getElementById("playbackProgress");
+    const players = tokens.filter(
+        token => token !== ball
+    );
 
 
-    /*
-    ==========================================
-    STATE
-    ==========================================
-    */
+    /* =========================================================
+       BUTTON REFERENCES
+    ========================================================= */
 
-    let selectedObject = null;
+    const B = {};
 
-    let isDragging = false;
+    [
+        "Full",
+        "Half",
+        "Reset",
+        "Play",
+        "Drib",
+        "Rec",
+        "Stop",
+        "Restart",
+        "Pause",
+        "Clear",
+        "Save"
+    ].forEach(name => {
 
-    let isRecording = false;
+        B[name] = $("b" + name);
 
-    let isPlaying = false;
-
-    let isPaused = false;
-
-    let recordingStartTime = 0;
-
-    let recordingTimer = null;
-
-    let playbackFrame = null;
-
-    let playbackStartTime = 0;
-
-    let playbackPausedAt = 0;
-
-    let recordedEvents = [];
-
-    let initialPositions = {};
-
-    let lastRecordedTime = 0;
-
-    let ballHandler = null;
-
-    let savedPlayName = "Untitled Play";
+    });
 
 
-    /*
-    ==========================================
-    OBJECT NAME
-    ==========================================
-    */
+    /* =========================================================
+       CONSTANTS
+    ========================================================= */
 
-    function getObjectName(object) {
+    const KEY = "courtlabSavedPlays";
 
-        if (object.classList.contains("ball")) {
+    const EMPTY_TL =
+        '<div class="empty">' +
+        'No play recorded yet. Press Record and start moving players.' +
+        '</div>';
+
+    const EMPTY_SV =
+        '<div class="empty">' +
+        'No saved plays yet. Record a play and press Save Recording.' +
+        '</div>';
+
+
+    /* =========================================================
+       APPLICATION STATE
+    ========================================================= */
+
+    let picked = null;
+    let dragging = null;
+    let handler = null;
+
+    let recording = false;
+    let playing = false;
+    let paused = false;
+
+    let t0 = 0;
+    let tick = null;
+
+    let raf = null;
+
+    let pStart = 0;
+    let pAt = 0;
+
+    let events = [];
+    let start = {};
+    let last = {};
+
+    let saved = [];
+
+    let title = "Untitled Play";
+
+
+    /* =========================================================
+       SMALL HELPERS
+    ========================================================= */
+
+    const say = text => {
+        statusEl.textContent = text;
+    };
+
+
+    const clamp = (
+        value,
+        minimum,
+        maximum
+    ) => {
+
+        return Math.min(
+            maximum,
+            Math.max(minimum, value)
+        );
+
+    };
+
+
+    const label = object => {
+
+        if (object === ball) {
             return "Ball";
         }
 
-        return "Player " + object.dataset.player;
+        return "Player " + object.dataset.id;
 
-    }
+    };
 
 
-    /*
-    ==========================================
-    GET POSITION
-    ==========================================
-    */
-
-    function getPosition(object) {
+    const pos = object => {
 
         return {
             x: parseFloat(object.style.left),
             y: parseFloat(object.style.top)
         };
 
-    }
+    };
 
 
-    /*
-    ==========================================
-    SELECT PLAYER
-    ==========================================
-    */
+    const put = (
+        object,
+        x,
+        y
+    ) => {
 
-    function selectPlayer(player) {
+        object.style.left = x + "%";
+        object.style.top = y + "%";
 
-        if (isPlaying) {
-            return;
+    };
+
+
+    const byLabel = name => {
+
+        if (name === "Ball") {
+            return ball;
         }
 
-        players.forEach(
-            other => {
-                other.classList.remove("selected");
-            }
+        return players.find(
+            player =>
+                "Player " + player.dataset.id === name
         );
 
-        ball.classList.remove("selected");
+    };
 
-        player.classList.add("selected");
 
-        selectedObject = player;
+    const has = () => {
+        return events.length > 0;
+    };
 
-        status.textContent =
-            getObjectName(player) +
-            " selected — press Dribble or drag the player.";
+
+    /* =========================================================
+       COURT MODE
+    ========================================================== */
+
+    function mode(half) {
+
+        court.classList.toggle(
+            "half",
+            half
+        );
+
+        court
+            .querySelector("svg")
+            .setAttribute(
+                "viewBox",
+                half
+                    ? "0 0 47 50"
+                    : "0 0 94 50"
+            );
+
+        B.Half.classList.toggle(
+            "on",
+            half
+        );
+
+        B.Full.classList.toggle(
+            "on",
+            !half
+        );
+
+        say(
+            (half ? "Half" : "Full") +
+            " court — drag players or the ball."
+        );
 
     }
 
 
-    /*
-    ==========================================
-    SAVE INITIAL POSITIONS
-    ==========================================
-    */
+    /* =========================================================
+       POSITION SNAPSHOT / RESTORE
+    ========================================================== */
 
-    function saveInitialPositions() {
+    const snapshot = () => {
 
-        initialPositions = {};
+        start = {};
 
-        const objects = [
-            ...players,
-            ball
-        ];
+        tokens.forEach(object => {
 
-        objects.forEach(object => {
-
-            initialPositions[
-                getObjectName(object)
-            ] = getPosition(object);
+            start[label(object)] =
+                pos(object);
 
         });
 
-    }
+    };
 
 
-    /*
-    ==========================================
-    RESTORE INITIAL POSITIONS
-    ==========================================
-    */
+    const restore = () => {
 
-    function restoreInitialPositions() {
-
-        const objects = [
-            ...players,
-            ball
-        ];
-
-        objects.forEach(object => {
-
-            const name =
-                getObjectName(object);
+        tokens.forEach(object => {
 
             const position =
-                initialPositions[name];
+                start[label(object)];
 
-            if (!position) {
-                return;
+            if (position) {
+
+                put(
+                    object,
+                    position.x,
+                    position.y
+                );
+
             }
-
-            object.style.left =
-                position.x + "%";
-
-            object.style.top =
-                position.y + "%";
 
         });
 
-        /*
-        Reconnect the ball to the ball handler
-        after restoring positions.
-        */
-
-        if (ballHandler) {
-            moveBallWithPlayer(ballHandler);
-        }
-
-    }
+    };
 
 
-    /*
-    ==========================================
-    COURT MODE
-    ==========================================
-    */
+    /* =========================================================
+       DRIBBLING
+    ========================================================== */
 
-    function setCourtMode(mode) {
+    function carry(player) {
 
-        if (mode === "half") {
+        const position =
+            pos(player);
 
-            court.classList.add("half-court");
+        put(
+            ball,
 
-            halfCourtBtn.classList.add("active");
+            clamp(
+                position.x + 2.8,
+                3,
+                97
+            ),
 
-            fullCourtBtn.classList.remove("active");
-
-            status.textContent =
-                "Half court — tap a player, then press Dribble.";
-
-        } else {
-
-            court.classList.remove("half-court");
-
-            fullCourtBtn.classList.add("active");
-
-            halfCourtBtn.classList.remove("active");
-
-            status.textContent =
-                "Full court — tap a player, then press Dribble.";
-
-        }
+            clamp(
+                position.y + 3.5,
+                5,
+                95
+            )
+        );
 
     }
 
 
-    fullCourtBtn.addEventListener(
-        "click",
-        () => setCourtMode("full")
-    );
-
-
-    halfCourtBtn.addEventListener(
-        "click",
-        () => setCourtMode("half")
-    );
-
-
-    /*
-    ==========================================
-    DRIBBLE / BALL HANDLER
-    ==========================================
-    */
-
-    function setBallHandler(player) {
-
-        if (!player) {
-
-            status.textContent =
-                "Tap an offensive player first.";
-
-            return;
-
-        }
+    function setHandler(player) {
 
         if (
-            player.classList.contains("defense")
+            !player ||
+            player.classList.contains("d")
         ) {
 
-            status.textContent =
-                "A defender cannot dribble the ball.";
-
-            return;
-
-        }
-
-        /*
-        Remove old ball handler.
-        */
-
-        if (ballHandler) {
-
-            ballHandler.classList.remove(
-                "ball-handler"
+            return say(
+                "Only an offensive player can dribble the ball."
             );
 
         }
 
-        ballHandler = player;
+        handler?.classList.remove("handler");
 
-        ballHandler.classList.add(
-            "ball-handler"
+        handler = player;
+
+        player.classList.add("handler");
+
+        carry(player);
+
+        B.Drib.classList.add("good");
+
+        B.Drib.textContent =
+            "🏀 Dribbling: " +
+            label(player);
+
+        say(
+            label(player) +
+            " is now the ball handler. " +
+            "Drag the player to move with the ball."
         );
-
-        /*
-        Immediately put the ball beside
-        the selected player.
-        */
-
-        moveBallWithPlayer(
-            ballHandler
-        );
-
-        dribbleBtn.classList.add(
-            "dribbling"
-        );
-
-        dribbleBtn.textContent =
-            "🏀 Stop Dribbling";
-
-        status.textContent =
-            getObjectName(ballHandler) +
-            " has the ball — drag the player.";
 
     }
 
 
-    function clearBallHandler() {
+    function clearHandler() {
 
-        if (ballHandler) {
+        handler?.classList.remove("handler");
 
-            ballHandler.classList.remove(
-                "ball-handler"
-            );
+        handler = null;
 
-        }
+        B.Drib.classList.remove("good");
 
-        ballHandler = null;
-
-        dribbleBtn.classList.remove(
-            "dribbling"
-        );
-
-        dribbleBtn.textContent =
+        B.Drib.textContent =
             "🏀 Dribble";
 
-        status.textContent =
-            "Dribbling stopped. The ball is independent.";
-
     }
 
 
-    function moveBallWithPlayer(player) {
+    B.Drib.onclick = () => {
 
-        const playerPosition =
-            getPosition(player);
+        if (handler) {
 
-        /*
-        Ball stays beside the player.
-        */
+            clearHandler();
 
-        let ballX =
-            playerPosition.x + 3;
-
-        let ballY =
-            playerPosition.y + 4;
-
-        ballX =
-            Math.max(
-                3,
-                Math.min(97, ballX)
+            say(
+                "Dribbling stopped. " +
+                "The ball can now be moved independently."
             );
 
-        ballY =
-            Math.max(
-                5,
-                Math.min(95, ballY)
-            );
-
-        ball.style.left =
-            ballX + "%";
-
-        ball.style.top =
-            ballY + "%";
-
-    }
-
-
-    /*
-    ==========================================
-    DRIBBLE BUTTON
-    ==========================================
-    */
-
-    dribbleBtn.addEventListener(
-        "click",
-        () => {
-
-            /*
-            If already dribbling,
-            pressing button stops it.
-            */
-
-            if (ballHandler) {
-
-                clearBallHandler();
-
-                return;
-
-            }
-
-            /*
-            IMPORTANT FIX:
-            Only an actual offensive player
-            can become the ball handler.
-            */
-
-            if (
-                selectedObject &&
-                selectedObject.classList.contains("offense")
-            ) {
-
-                setBallHandler(
-                    selectedObject
-                );
-
-                return;
-
-            }
-
-            status.textContent =
-                "Tap an offensive player first, then press Dribble.";
-
-        }
-    );
-
-
-    /*
-    ==========================================
-    RECORDING TIMER
-    ==========================================
-    */
-
-    function updateRecordingTimer() {
-
-        if (!isRecording) {
             return;
         }
 
-        const elapsed =
-            (
-                performance.now()
-                - recordingStartTime
-            ) / 1000;
-
-        recordingTime.textContent =
-            elapsed.toFixed(1) + "s";
-
-    }
-
-
-    /*
-    ==========================================
-    START RECORDING
-    ==========================================
-    */
-
-    function startRecording() {
-
-        stopPlayback();
-
-        recordedEvents = [];
-
-        savedPlayName =
-            playName.value.trim()
-            || "Untitled Play";
-
-        saveInitialPositions();
-
-        recordingStartTime =
-            performance.now();
-
-        lastRecordedTime = 0;
-
-        isRecording = true;
-
-        recordingIndicator.style.display =
-            "inline-flex";
-
-        recordBtn.classList.add(
-            "recording"
-        );
-
-        recordBtn.textContent =
-            "🔴 Recording...";
-
-        recordBtn.disabled = true;
-
-        stopBtn.disabled = false;
-
-        restartBtn.disabled = true;
-
-        pauseBtn.disabled = true;
-
-        clearBtn.disabled = false;
-
-        playBtn.disabled = true;
-
-        playName.disabled = true;
-
-        recordingTime.textContent =
-            "0.0s";
-
-        timeline.innerHTML = "";
-
-        const titleEvent =
-            document.createElement("div");
-
-        titleEvent.className =
-            "play-title-display";
-
-        titleEvent.textContent =
-            "🎬 " + savedPlayName;
-
-        timeline.appendChild(
-            titleEvent
-        );
-
-        const startingEvent =
-            document.createElement("div");
-
-        startingEvent.className =
-            "timeline-item";
-
-        startingEvent.innerHTML = `
-            <span class="timeline-time">0.0s</span>
-            <span class="timeline-player">All</span>
-            <span class="timeline-action">Starting positions saved</span>
-        `;
-
-        timeline.appendChild(
-            startingEvent
-        );
-
-        recordingTimer =
-            setInterval(
-                updateRecordingTimer,
-                50
-            );
-
-        status.textContent =
-            "Recording \"" +
-            savedPlayName +
-            "\" — move players, ball, or dribble.";
-
-    }
-
-
-    /*
-    ==========================================
-    STOP RECORDING
-    ==========================================
-    */
-
-    function stopRecording() {
-
-        if (!isRecording) {
-            return;
-        }
-
-        isRecording = false;
-
-        clearInterval(
-            recordingTimer
-        );
-
-        recordingTimer = null;
-
-        recordingIndicator.style.display =
-            "none";
-
-        recordBtn.classList.remove(
-            "recording"
-        );
-
-        recordBtn.textContent =
-            "🔴 Record";
-
-        recordBtn.disabled = false;
-
-        stopBtn.disabled = true;
-
-        restartBtn.disabled =
-            recordedEvents.length === 0;
-
-        pauseBtn.disabled = true;
-
-        clearBtn.disabled =
-            recordedEvents.length === 0;
-
-        playBtn.disabled =
-            recordedEvents.length === 0;
-
-        playName.disabled = false;
-
-        status.textContent =
-            recordedEvents.length > 0
-                ? "\"" +
-                    savedPlayName +
-                    "\" recorded — press Play to review it."
-                : "No movement was recorded.";
-
-    }
-
-
-    /*
-    ==========================================
-    RECORD MOVEMENT
-    ==========================================
-    */
-
-    function recordMovement(object) {
-
-        if (!isRecording) {
-            return;
-        }
-
-        const now =
-            performance.now();
-
-        const elapsed =
-            (now - recordingStartTime) / 1000;
 
         if (
-            elapsed - lastRecordedTime < 0.05
+            picked &&
+            picked !== ball
         ) {
+
+            setHandler(picked);
+
             return;
         }
 
-        lastRecordedTime = elapsed;
 
-        const position =
-            getPosition(object);
-
-        const event = {
-
-            time: elapsed,
-
-            object: getObjectName(object),
-
-            x: position.x,
-
-            y: position.y
-
-        };
-
-        recordedEvents.push(
-            event
+        say(
+            "Select an offensive player first, " +
+            "then press Dribble."
         );
 
-        addTimelineEvent(
-            event
+    };
+
+
+    /* =========================================================
+       TIMELINE
+    ========================================================== */
+
+    function heading() {
+
+        $("timeline").innerHTML = "";
+
+        const heading =
+            document.createElement("div");
+
+        heading.className = "title";
+
+        heading.textContent =
+            "🎬 " + title;
+
+        $("timeline").appendChild(
+            heading
         );
 
     }
 
 
-    /*
-    ==========================================
-    RECORD FINAL POSITION
-    ==========================================
-    */
+    function row(
+        time,
+        who,
+        what
+    ) {
 
-    function recordFinalMovement(object) {
+        const timeline =
+            $("timeline");
 
-        if (!isRecording) {
-            return;
-        }
+        timeline
+            .querySelector(".empty")
+            ?.remove();
 
-        const elapsed =
-            (
-                performance.now()
-                - recordingStartTime
-            ) / 1000;
-
-        const position =
-            getPosition(object);
-
-        const event = {
-
-            time: elapsed,
-
-            object: getObjectName(object),
-
-            x: position.x,
-
-            y: position.y
-
-        };
-
-        recordedEvents.push(
-            event
-        );
-
-        addTimelineEvent(
-            event
-        );
-
-    }
-
-
-    /*
-    ==========================================
-    TIMELINE
-    ==========================================
-    */
-
-    function addTimelineEvent(event) {
-
-        const empty =
-            timeline.querySelector(
-                ".timeline-empty"
-            );
-
-        if (empty) {
-            empty.remove();
-        }
 
         const item =
             document.createElement("div");
 
-        item.className =
-            "timeline-item";
+        item.className = "ev";
 
-        item.innerHTML = `
-            <span class="timeline-time">
-                ${event.time.toFixed(1)}s
-            </span>
 
-            <span class="timeline-player">
-                ${event.object}
-            </span>
+        const timeElement =
+            document.createElement("time");
 
-            <span class="timeline-action">
-                MOVE
-            </span>
-        `;
+        const playerElement =
+            document.createElement("b");
 
-        timeline.appendChild(
-            item
+        const actionElement =
+            document.createElement("span");
+
+
+        timeElement.textContent = time;
+
+        playerElement.textContent = who;
+
+        actionElement.textContent = what;
+
+
+        item.append(
+            timeElement,
+            playerElement,
+            actionElement
         );
+
+
+        timeline.appendChild(item);
 
         timeline.scrollTop =
             timeline.scrollHeight;
@@ -1835,236 +1773,626 @@
     }
 
 
-    /*
-    ==========================================
-    DRAGGING
-    ==========================================
-    */
+    const addEvent = event => {
 
-    function startDragging(event) {
+        row(
+            event.t.toFixed(1) + "s",
+            event.who,
+            "MOVE"
+        );
 
-        if (isPlaying) {
-            return;
+    };
+
+
+    /* =========================================================
+       SAVED PLAYS
+    ========================================================== */
+
+    function load() {
+
+        try {
+
+            const value =
+                JSON.parse(
+                    localStorage.getItem(KEY)
+                );
+
+            saved =
+                Array.isArray(value)
+                    ? value
+                    : [];
+
+        } catch {
+
+            saved = [];
+
         }
 
-        selectedObject =
-            event.currentTarget;
+        drawSaved();
 
-        /*
-        If the ball is selected,
-        clear player selection.
-        */
+    }
 
-        players.forEach(
-            player => {
-                player.classList.remove("selected");
+
+    function store() {
+
+        try {
+
+            localStorage.setItem(
+                KEY,
+                JSON.stringify(saved)
+            );
+
+        } catch {
+
+            /* Ignore localStorage errors */
+
+        }
+
+    }
+
+
+    function drawSaved() {
+
+        const box =
+            $("saved");
+
+        box.innerHTML =
+            saved.length
+                ? ""
+                : EMPTY_SV;
+
+
+        saved.forEach(
+            (playData, index) => {
+
+                const item =
+                    document.createElement("div");
+
+                item.className = "saved";
+
+
+                const name =
+                    document.createElement("strong");
+
+                name.textContent =
+                    playData.name;
+
+
+                const actions =
+                    document.createElement("div");
+
+                actions.className = "row";
+
+
+                const playButton =
+                    document.createElement("button");
+
+                playButton.textContent =
+                    "▶ Play";
+
+                playButton.onclick =
+                    () => playSaved(playData);
+
+
+                const deleteButton =
+                    document.createElement("button");
+
+                deleteButton.textContent =
+                    "🗑 Delete";
+
+
+                deleteButton.onclick = () => {
+
+                    saved.splice(index, 1);
+
+                    store();
+
+                    drawSaved();
+
+                    say(
+                        "Saved play deleted."
+                    );
+
+                };
+
+
+                actions.append(
+                    playButton,
+                    deleteButton
+                );
+
+
+                item.append(
+                    name,
+                    actions
+                );
+
+
+                box.appendChild(item);
+
             }
         );
 
-        ball.classList.remove("selected");
+    }
 
-        selectedObject.classList.add(
-            "selected"
+
+    function playSaved(playData) {
+
+        if (
+            recording ||
+            !playData?.events?.length
+        ) {
+
+            return;
+
+        }
+
+
+        title =
+            playData.name ||
+            "Untitled Play";
+
+
+        events =
+            JSON.parse(
+                JSON.stringify(
+                    playData.events
+                )
+            );
+
+
+        start =
+            JSON.parse(
+                JSON.stringify(
+                    playData.start || {}
+                )
+            );
+
+
+        $("name").value =
+            title;
+
+
+        heading();
+
+        events.forEach(addEvent);
+
+
+        B.Clear.disabled = false;
+
+        B.Restart.disabled = false;
+
+        B.Play.disabled = false;
+
+        B.Save.disabled = false;
+
+
+        play();
+
+    }
+
+
+    B.Save.onclick = () => {
+
+        if (!has()) {
+            return;
+        }
+
+
+        const name =
+            $("name").value.trim() ||
+            title;
+
+
+        saved.unshift({
+
+            name,
+
+            events:
+                JSON.parse(
+                    JSON.stringify(events)
+                ),
+
+            start:
+                JSON.parse(
+                    JSON.stringify(start)
+                )
+
+        });
+
+
+        store();
+
+        drawSaved();
+
+
+        title = name;
+
+        $("name").value =
+            name;
+
+
+        say(
+            `"${name}" saved. ` +
+            "You can choose it from Saved Plays anytime."
         );
 
-        isDragging = true;
+    };
 
-        selectedObject.setPointerCapture(
+
+    /* =========================================================
+       RECORDING
+    ========================================================== */
+
+    function record() {
+
+        halt();
+
+
+        events = [];
+
+        last = {};
+
+
+        title =
+            $("name").value.trim() ||
+            "Untitled Play";
+
+
+        snapshot();
+
+
+        t0 =
+            performance.now();
+
+
+        recording = true;
+
+
+        $("dot")
+            .classList
+            .add("on");
+
+
+        B.Rec.classList.add("rec");
+
+        B.Rec.textContent =
+            "🔴 Recording...";
+
+        B.Rec.disabled = true;
+
+
+        B.Stop.disabled = false;
+
+        B.Clear.disabled = false;
+
+
+        B.Restart.disabled =
+            B.Pause.disabled =
+            B.Save.disabled =
+            B.Play.disabled =
+            true;
+
+
+        $("name").disabled = true;
+
+
+        $("clock").textContent =
+            "0.0s";
+
+        $("prog").style.width =
+            "0%";
+
+
+        heading();
+
+
+        row(
+            "0.0s",
+            "All",
+            "Starting positions saved"
+        );
+
+
+        tick =
+            setInterval(
+                () => {
+
+                    $("clock").textContent =
+                        (
+                            (performance.now() - t0) /
+                            1000
+                        ).toFixed(1) +
+                        "s";
+
+                },
+                50
+            );
+
+
+        say(
+            `Recording "${title}" — move your players and ball.`
+        );
+
+    }
+
+
+    function stop() {
+
+        if (!recording) {
+            return;
+        }
+
+
+        recording = false;
+
+
+        clearInterval(tick);
+
+
+        $("dot")
+            .classList
+            .remove("on");
+
+
+        B.Rec.classList.remove("rec");
+
+        B.Rec.textContent =
+            "🔴 Record";
+
+        B.Rec.disabled = false;
+
+
+        B.Stop.disabled =
+            B.Pause.disabled =
+            true;
+
+
+        B.Restart.disabled =
+            B.Clear.disabled =
+            B.Save.disabled =
+            B.Play.disabled =
+            !has();
+
+
+        $("name").disabled = false;
+
+
+        say(
+            has()
+                ? `"${title}" recorded — press Play to review it.`
+                : "No movement was recorded."
+        );
+
+    }
+
+
+    function log(
+        object,
+        force = false
+    ) {
+
+        if (!recording) {
+            return;
+        }
+
+
+        const time =
+            (performance.now() - t0) /
+            1000;
+
+
+        const key =
+            label(object);
+
+
+        if (
+            !force &&
+            time - (last[key] ?? -1) < 0.05
+        ) {
+
+            return;
+
+        }
+
+
+        last[key] =
+            time;
+
+
+        const event = {
+
+            t: time,
+
+            who: key,
+
+            ...pos(object)
+
+        };
+
+
+        events.push(event);
+
+        addEvent(event);
+
+    }
+
+
+    /* =========================================================
+       DRAGGING
+    ========================================================== */
+
+    function grab(event) {
+
+        if (playing) {
+            return;
+        }
+
+
+        dragging =
+            picked =
+            event.currentTarget;
+
+
+        dragging.classList.add("drag");
+
+
+        dragging.setPointerCapture(
             event.pointerId
         );
 
-        const objectName =
-            getObjectName(selectedObject);
 
-        status.textContent =
-            isRecording
-                ? "Recording " +
-                    objectName +
-                    " movement..."
-                : "Moving " +
-                    objectName;
+        say(
+            (recording
+                ? "Recording "
+                : "Moving "
+            ) +
+            label(dragging) +
+            (
+                recording
+                    ? " movement..."
+                    : ""
+            )
+        );
+
 
         event.preventDefault();
 
     }
 
 
-    function moveObject(event) {
+    function drag(event) {
 
         if (
-            !isDragging ||
-            !selectedObject ||
-            isPlaying
+            !dragging ||
+            playing
         ) {
+
             return;
+
         }
 
-        const courtRect =
+
+        const rect =
             court.getBoundingClientRect();
 
-        let x =
-            (
-                (event.clientX - courtRect.left)
-                / courtRect.width
-            ) * 100;
 
-        let y =
-            (
-                (event.clientY - courtRect.top)
-                / courtRect.height
-            ) * 100;
+        const x =
+            (event.clientX - rect.left) /
+            rect.width *
+            100;
 
-        x =
-            Math.max(
+
+        const y =
+            (event.clientY - rect.top) /
+            rect.height *
+            100;
+
+
+        put(
+            dragging,
+
+            clamp(
+                x,
                 3,
-                Math.min(97, x)
-            );
+                97
+            ),
 
-        y =
-            Math.max(
+            clamp(
+                y,
                 5,
-                Math.min(95, y)
-            );
+                95
+            )
+        );
 
-        selectedObject.style.left =
-            x + "%";
-
-        selectedObject.style.top =
-            y + "%";
-
-
-        /*
-        ==========================================
-        BALL HANDLER
-        ==========================================
-        */
 
         if (
-            ballHandler === selectedObject
+            handler === dragging
         ) {
 
-            moveBallWithPlayer(
-                selectedObject
-            );
+            carry(dragging);
 
-            if (isRecording) {
-
-                recordMovement(
-                    ball
-                );
-
-            }
+            log(ball);
 
         }
 
 
-        recordMovement(
-            selectedObject
-        );
+        log(dragging);
 
     }
 
 
-    function stopDragging() {
+    function drop() {
 
-        if (!selectedObject) {
+        if (!dragging) {
             return;
         }
 
-        if (isRecording) {
 
-            recordFinalMovement(
-                selectedObject
+        if (recording) {
+
+            log(
+                dragging,
+                true
             );
 
+
             if (
-                ballHandler === selectedObject
+                handler === dragging
             ) {
 
-                recordFinalMovement(
-                    ball
+                log(
+                    ball,
+                    true
                 );
 
             }
 
         }
 
-        isDragging = false;
 
-        /*
-        IMPORTANT:
-        Do NOT clear selectedObject here.
+        dragging.classList.remove("drag");
 
-        This is what allows:
+        dragging = null;
 
-        TAP PLAYER
-        ↓
-        DRIBBLE
 
-        without losing the selection.
-        */
-
-        selectedObject.classList.remove(
-            "selected"
+        say(
+            recording
+                ? "Movement recorded. Continue building the play."
+                : "Position updated. Keep designing your play."
         );
-
-        /*
-        Keep the selected reference alive
-        for the Dribble button.
-        */
-
-        if (isRecording) {
-
-            status.textContent =
-                "Movement recorded. Continue building the play.";
-
-        } else {
-
-            if (ballHandler === selectedObject) {
-
-                status.textContent =
-                    getObjectName(selectedObject) +
-                    " is dribbling. Keep moving.";
-
-            } else {
-
-                status.textContent =
-                    "Position updated.";
-
-            }
-
-        }
 
     }
 
 
-    /*
-    ==========================================
-    PLAYER EVENTS
-    ==========================================
-    */
+    /* =========================================================
+       TOKEN EVENTS
+    ========================================================== */
 
-    players.forEach(player => {
+    tokens.forEach(object => {
 
-        player.addEventListener(
+        object.addEventListener(
             "pointerdown",
-            startDragging
+            grab
         );
 
-        /*
-        A normal tap selects the player.
-        */
 
-        player.addEventListener(
+        object.addEventListener(
             "click",
             () => {
 
-                if (isPlaying) {
+                if (playing) {
                     return;
                 }
 
-                selectPlayer(
-                    player
+
+                picked = object;
+
+
+                say(
+                    object === ball
+                        ? "Ball selected — drag it anywhere on the court."
+                        : label(object) + " selected."
                 );
 
             }
@@ -2073,494 +2401,364 @@
     });
 
 
-    /*
-    ==========================================
-    BALL EVENTS
-    ==========================================
-    */
-
-    ball.addEventListener(
-        "pointerdown",
-        startDragging
-    );
-
-
-    ball.addEventListener(
-        "click",
-        () => {
-
-            if (isPlaying) {
-                return;
-            }
-
-            players.forEach(
-                player => {
-                    player.classList.remove(
-                        "selected"
-                    );
-                }
-            );
-
-            ball.classList.add(
-                "selected"
-            );
-
-            selectedObject =
-                ball;
-
-            status.textContent =
-                "Ball selected — drag it anywhere.";
-
-        }
-    );
-
-
-    /*
-    ==========================================
-    MOVEMENT
-    ==========================================
-    */
-
     court.addEventListener(
         "pointermove",
-        moveObject
+        drag
     );
 
 
-    window.addEventListener(
+    addEventListener(
         "pointerup",
-        stopDragging
+        drop
     );
 
 
-    /*
-    ==========================================
-    PLAYBACK
-    ==========================================
-    */
+    addEventListener(
+        "pointercancel",
+        drop
+    );
 
-    function startPlayback() {
+
+    /* =========================================================
+       PLAYBACK
+    ========================================================== */
+
+    function play() {
 
         if (
-            recordedEvents.length === 0 ||
-            isRecording
+            !has() ||
+            recording
         ) {
+
             return;
+
         }
 
-        stopPlayback();
 
-        restoreInitialPositions();
+        halt();
 
-        isPlaying = true;
 
-        isPaused = false;
+        restore();
 
-        playbackPausedAt = 0;
 
-        playbackStartTime =
+        playing = true;
+
+        paused = false;
+
+
+        pStart =
             performance.now();
 
-        playBtn.textContent =
+
+        B.Play.textContent =
             "▶ Playing...";
 
-        playBtn.disabled = true;
+        B.Play.disabled = true;
 
-        restartBtn.disabled = false;
 
-        pauseBtn.disabled = false;
+        B.Restart.disabled = false;
 
-        pauseBtn.textContent =
+        B.Pause.disabled = false;
+
+        B.Pause.textContent =
             "⏸ Pause";
 
-        status.textContent =
-            "Playing \"" +
-            savedPlayName +
-            "\"...";
 
-        runPlayback();
+        say(
+            `Playing "${title}"...`
+        );
+
+
+        frame();
 
     }
 
 
-    function runPlayback() {
+    function frame() {
 
-        if (!isPlaying || isPaused) {
+        if (!playing) {
             return;
         }
 
-        const elapsed =
-            (
-                performance.now()
-                - playbackStartTime
-            ) / 1000;
 
-        const totalDuration =
-            recordedEvents.length > 0
-                ? recordedEvents[
-                    recordedEvents.length - 1
-                ].time
-                : 0;
+        const now =
+            (performance.now() - pStart) /
+            1000;
 
-        let progress =
-            totalDuration > 0
-                ? (elapsed / totalDuration) * 100
-                : 100;
 
-        progress =
-            Math.max(
+        const end =
+            events[
+                events.length - 1
+            ].t;
+
+
+        $("prog").style.width =
+            clamp(
+                end > 0
+                    ? now / end * 100
+                    : 100,
                 0,
-                Math.min(100, progress)
-            );
-
-        playbackProgress.style.width =
-            progress + "%";
+                100
+            ) +
+            "%";
 
 
-        recordedEvents.forEach(event => {
+        events.forEach(event => {
 
-            if (event.time <= elapsed) {
+            if (event.t <= now) {
 
                 const object =
-                    findObject(
-                        event.object
+                    byLabel(event.who);
+
+                if (object) {
+
+                    put(
+                        object,
+                        event.x,
+                        event.y
                     );
 
-                if (!object) {
-                    return;
                 }
-
-                object.style.left =
-                    event.x + "%";
-
-                object.style.top =
-                    event.y + "%";
 
             }
 
         });
 
 
-        if (
-            elapsed >= totalDuration
-        ) {
+        if (now >= end) {
 
-            finishPlayback();
-
-            return;
+            return done();
 
         }
 
 
-        playbackFrame =
-            requestAnimationFrame(
-                runPlayback
-            );
+        raf =
+            requestAnimationFrame(frame);
 
     }
 
 
-    /*
-    ==========================================
-    FIND OBJECT
-    ==========================================
-    */
+    function pause() {
 
-    function findObject(name) {
-
-        if (name === "Ball") {
-            return ball;
-        }
-
-        const playerNumber =
-            name.replace(
-                "Player ",
-                ""
-            );
-
-        return document.querySelector(
-            `.player[data-player="${playerNumber}"]`
-        );
-
-    }
-
-
-    /*
-    ==========================================
-    PAUSE
-    ==========================================
-    */
-
-    function pausePlayback() {
-
-        if (!isPlaying) {
+        if (!playing) {
             return;
         }
 
-        if (!isPaused) {
 
-            isPaused = true;
+        paused = !paused;
 
-            playbackPausedAt =
+
+        if (paused) {
+
+            pAt =
                 (
-                    performance.now()
-                    - playbackStartTime
-                ) / 1000;
+                    performance.now() -
+                    pStart
+                ) /
+                1000;
 
-            cancelAnimationFrame(
-                playbackFrame
-            );
 
-            pauseBtn.textContent =
+            cancelAnimationFrame(raf);
+
+
+            B.Pause.textContent =
                 "▶ Resume";
 
-            status.textContent =
-                "Playback paused.";
+
+            say(
+                "Playback paused."
+            );
 
         } else {
 
-            isPaused = false;
+            pStart =
+                performance.now() -
+                pAt * 1000;
 
-            playbackStartTime =
-                performance.now()
-                - (
-                    playbackPausedAt
-                    * 1000
-                );
 
-            pauseBtn.textContent =
+            B.Pause.textContent =
                 "⏸ Pause";
 
-            status.textContent =
-                "Playback resumed.";
 
-            runPlayback();
+            say(
+                "Playback resumed."
+            );
+
+
+            frame();
 
         }
 
     }
 
 
-    /*
-    ==========================================
-    FINISH PLAYBACK
-    ==========================================
-    */
+    function halt() {
 
-    function finishPlayback() {
+        playing = false;
 
-        isPlaying = false;
+        paused = false;
 
-        isPaused = false;
 
-        cancelAnimationFrame(
-            playbackFrame
-        );
+        cancelAnimationFrame(raf);
 
-        playbackFrame = null;
 
-        playbackProgress.style.width =
-            "100%";
+        B.Pause.disabled = true;
 
-        playBtn.disabled = false;
+        B.Pause.textContent =
+            "⏸ Pause";
 
-        playBtn.textContent =
+
+        B.Play.textContent =
             "▶ Play";
 
-        pauseBtn.disabled = true;
 
-        pauseBtn.textContent =
-            "⏸ Pause";
+        if (has()) {
 
-        restartBtn.disabled = false;
+            B.Play.disabled = false;
 
-        status.textContent =
-            "\"" +
-            savedPlayName +
-            "\" finished. Press Play to watch it again.";
+        }
 
     }
 
 
-    /*
-    ==========================================
-    STOP PLAYBACK
-    ==========================================
-    */
+    function done() {
 
-    function stopPlayback() {
+        halt();
 
-        isPlaying = false;
 
-        isPaused = false;
+        $("prog").style.width =
+            "100%";
 
-        cancelAnimationFrame(
-            playbackFrame
+
+        B.Restart.disabled =
+            false;
+
+
+        say(
+            `"${title}" finished. ` +
+            "Press Play to watch it again."
         );
 
-        playbackFrame = null;
-
-        pauseBtn.disabled = true;
-
-        pauseBtn.textContent =
-            "⏸ Pause";
-
-        if (recordedEvents.length > 0) {
-            playBtn.disabled = false;
-        }
-
     }
 
 
-    /*
-    ==========================================
-    RESTART
-    ==========================================
-    */
+    /* =========================================================
+       BUTTON ACTIONS
+    ========================================================== */
 
-    restartBtn.addEventListener(
-        "click",
-        () => {
+    B.Full.onclick = () => {
+        mode(false);
+    };
 
-            if (
-                recordedEvents.length === 0
-            ) {
-                return;
-            }
 
-            stopPlayback();
+    B.Half.onclick = () => {
+        mode(true);
+    };
 
-            restoreInitialPositions();
 
-            playbackProgress.style.width =
-                "0%";
+    B.Reset.onclick = () => {
+        location.reload();
+    };
 
-            status.textContent =
-                "\"" +
-                savedPlayName +
-                "\" reset. Press Play to review it.";
 
+    B.Play.onclick = () => {
+        play();
+    };
+
+
+    B.Pause.onclick = () => {
+        pause();
+    };
+
+
+    B.Rec.onclick = () => {
+        record();
+    };
+
+
+    B.Stop.onclick = () => {
+        stop();
+    };
+
+
+    B.Restart.onclick = () => {
+
+        if (!has()) {
+            return;
         }
-    );
 
 
-    /*
-    ==========================================
-    PLAY
-    ==========================================
-    */
-
-    playBtn.addEventListener(
-        "click",
-        startPlayback
-    );
+        halt();
 
 
-    /*
-    ==========================================
-    PAUSE
-    ==========================================
-    */
-
-    pauseBtn.addEventListener(
-        "click",
-        pausePlayback
-    );
+        restore();
 
 
-    /*
-    ==========================================
-    RECORD
-    ==========================================
-    */
-
-    recordBtn.addEventListener(
-        "click",
-        startRecording
-    );
+        $("prog").style.width =
+            "0%";
 
 
-    /*
-    ==========================================
-    STOP
-    ==========================================
-    */
+        say(
+            `"${title}" reset. ` +
+            "Press Play to review it."
+        );
 
-    stopBtn.addEventListener(
-        "click",
-        stopRecording
-    );
+    };
 
 
-    /*
-    ==========================================
-    CLEAR RECORDING
-    ==========================================
-    */
+    B.Clear.onclick = () => {
 
-    clearBtn.addEventListener(
-        "click",
-        () => {
-
-            stopPlayback();
-
-            recordedEvents = [];
-
-            initialPositions = {};
-
-            recordingTime.textContent =
-                "0.0s";
-
-            playbackProgress.style.width =
-                "0%";
-
-            timeline.innerHTML = `
-                <div class="timeline-empty">
-                    No play recorded yet.
-                    Press Record and start moving players.
-                </div>
-            `;
-
-            playBtn.disabled = true;
-
-            restartBtn.disabled = true;
-
-            pauseBtn.disabled = true;
-
-            clearBtn.disabled = true;
-
-            playName.disabled = false;
-
-            status.textContent =
-                "Recording cleared. You can design a new play.";
-
-        }
-    );
+        halt();
 
 
-    /*
-    ==========================================
-    RESET
-    ==========================================
-    */
+        events = [];
 
-    resetBtn.addEventListener(
-        "click",
-        () => {
-
-            location.reload();
-
-        }
-    );
+        start = {};
 
 
-    /*
-    ==========================================
-    INITIAL SETUP
-    ==========================================
-    */
+        $("clock").textContent =
+            "0.0s";
 
-    saveInitialPositions();
+
+        $("prog").style.width =
+            "0%";
+
+
+        $("timeline").innerHTML =
+            EMPTY_TL;
+
+
+        B.Play.disabled =
+            B.Restart.disabled =
+            B.Pause.disabled =
+            B.Clear.disabled =
+            B.Save.disabled =
+            true;
+
+
+        $("name").disabled = false;
+
+
+        say(
+            "Recording cleared. " +
+            "You can design a new play."
+        );
+
+    };
+
+
+    /* =========================================================
+       INITIALIZATION
+    ========================================================== */
+
+    $("timeline").innerHTML =
+        EMPTY_TL;
+
+
+    snapshot();
+
+
+    load();
 
 </script>
 

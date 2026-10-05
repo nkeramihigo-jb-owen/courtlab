@@ -8,6 +8,7 @@
 
 <title>CourtLab — Basketball Play Simulator</title>
 
+
 <style>
     * {
         box-sizing: border-box;
@@ -101,11 +102,10 @@
         touch-action: none;
     }
 
-    /*
-    ==========================================
-    BASIC COURT MARKINGS
-    ==========================================
-    */
+
+    /* ==========================================
+       COURT MARKINGS
+       ========================================== */
 
     .half-court-line {
         position: absolute;
@@ -139,11 +139,10 @@
         transform: translate(-50%, -50%);
     }
 
-    /*
-    ==========================================
-    PAINT
-    ==========================================
-    */
+
+    /* ==========================================
+       PAINT
+       ========================================== */
 
     .paint-left,
     .paint-right {
@@ -162,11 +161,10 @@
         right: 0;
     }
 
-    /*
-    ==========================================
-    FREE THROW CIRCLES
-    ==========================================
-    */
+
+    /* ==========================================
+       FREE THROW CIRCLES
+       ========================================== */
 
     .free-circle-left,
     .free-circle-right {
@@ -187,11 +185,10 @@
         right: 11%;
     }
 
-    /*
-    ==========================================
-    THREE POINT LINES
-    ==========================================
-    */
+
+    /* ==========================================
+       THREE POINT LINES
+       ========================================== */
 
     .three-point-left,
     .three-point-right {
@@ -211,11 +208,10 @@
         right: -21%;
     }
 
-    /*
-    ==========================================
-    BASKETS
-    ==========================================
-    */
+
+    /* ==========================================
+       BASKETS
+       ========================================== */
 
     .basket-left,
     .basket-right {
@@ -237,19 +233,12 @@
         right: 1%;
     }
 
-    /*
-    ==========================================
-    HALF COURT MODE
-    ==========================================
-    */
+
+    /* ==========================================
+       HALF COURT
+       ========================================== */
 
     .court.half-court {
-        /*
-        Keep the correct half-court proportions,
-        but limit the desktop height so it fits
-        comfortably on a PC screen.
-        */
-
         width: min(
             100%,
             calc((100vh - 330px) * 0.94)
@@ -285,11 +274,10 @@
         left: -42%;
     }
 
-    /*
-    ==========================================
-    PLAYERS
-    ==========================================
-    */
+
+    /* ==========================================
+       PLAYERS
+       ========================================== */
 
     .player {
         position: absolute;
@@ -316,6 +304,8 @@
 
         box-shadow:
             0 4px 10px rgba(0, 0, 0, 0.35);
+
+        touch-action: none;
     }
 
     .player:active {
@@ -332,21 +322,21 @@
 
     .player.selected {
         box-shadow:
-            0 0 0 4px rgba(255, 255, 255, 0.5),
+            0 0 0 4px rgba(255, 255, 255, 0.55),
             0 6px 15px rgba(0, 0, 0, 0.4);
     }
 
     .player.ball-handler {
         box-shadow:
             0 0 0 4px #f97316,
+            0 0 0 7px rgba(249, 115, 22, 0.25),
             0 6px 15px rgba(0, 0, 0, 0.4);
     }
 
-    /*
-    ==========================================
-    BALL
-    ==========================================
-    */
+
+    /* ==========================================
+       BALL
+       ========================================== */
 
     .ball {
         position: absolute;
@@ -365,19 +355,17 @@
         cursor: grab;
 
         transform: translate(-50%, -50%);
-    }
 
-    /*
-    Larger invisible interaction area
-    makes the ball much easier to grab.
-    */
+        touch-action: none;
+    }
 
     .ball::before {
         content: "";
+
         position: absolute;
 
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
 
         left: 50%;
         top: 50%;
@@ -391,11 +379,10 @@
             0 5px 12px rgba(0, 0, 0, 0.4);
     }
 
-    /*
-    ==========================================
-    INFO
-    ==========================================
-    */
+
+    /* ==========================================
+       INFO
+       ========================================== */
 
     .info-panel {
         margin-top: 15px;
@@ -453,11 +440,10 @@
         font-size: 14px;
     }
 
-    /*
-    ==========================================
-    RECORDING PANEL
-    ==========================================
-    */
+
+    /* ==========================================
+       RECORDING PANEL
+       ========================================== */
 
     .recording-panel {
         margin-top: 15px;
@@ -631,11 +617,10 @@
         transition: width 0.05s linear;
     }
 
-    /*
-    ==========================================
-    FOOTER
-    ==========================================
-    */
+
+    /* ==========================================
+       FOOTER
+       ========================================== */
 
     .footer {
         text-align: center;
@@ -644,11 +629,10 @@
         margin-top: 25px;
     }
 
-    /*
-    ==========================================
-    MOBILE
-    ==========================================
-    */
+
+    /* ==========================================
+       MOBILE
+       ========================================== */
 
     @media (max-width: 700px) {
 
@@ -660,11 +644,6 @@
             flex-direction: column;
             align-items: flex-start;
         }
-
-        /*
-        On mobile, return to full width.
-        This keeps the behavior you already liked.
-        */
 
         .court.half-court {
             width: 100%;
@@ -679,6 +658,11 @@
         .ball {
             width: 20px;
             height: 20px;
+        }
+
+        .ball::before {
+            width: 42px;
+            height: 42px;
         }
 
         .play-name-row {
@@ -696,7 +680,6 @@
     }
 
 </style>
-
 
 </head>
 
@@ -761,8 +744,6 @@
         id="court"
     >
 
-        <!-- CENTER -->
-
         <div class="half-court-line"></div>
 
         <div class="center-circle"></div>
@@ -770,28 +751,20 @@
         <div class="center-dot"></div>
 
 
-        <!-- PAINT -->
-
         <div class="paint-left"></div>
 
         <div class="paint-right"></div>
 
-
-        <!-- FREE THROW -->
 
         <div class="free-circle-left"></div>
 
         <div class="free-circle-right"></div>
 
 
-        <!-- THREE POINT -->
-
         <div class="three-point-left"></div>
 
         <div class="three-point-right"></div>
 
-
-        <!-- BASKETS -->
 
         <div class="basket-left"></div>
 
@@ -924,7 +897,7 @@
         class="status"
         id="status"
     >
-        Full court — drag players or the ball.
+        Full court — tap a player, then press Dribble.
     </div>
 
 </div>
@@ -984,7 +957,10 @@
 
     <!-- DRIBBLE -->
 
-    <div class="recording-controls" style="margin-bottom:10px;">
+    <div
+        class="recording-controls"
+        style="margin-bottom:10px;"
+    >
 
         <button
             id="dribbleBtn"
@@ -995,6 +971,8 @@
 
     </div>
 
+
+    <!-- RECORDING CONTROLS -->
 
     <div class="recording-controls">
 
@@ -1210,6 +1188,37 @@
 
     /*
     ==========================================
+    SELECT PLAYER
+    ==========================================
+    */
+
+    function selectPlayer(player) {
+
+        if (isPlaying) {
+            return;
+        }
+
+        players.forEach(
+            other => {
+                other.classList.remove("selected");
+            }
+        );
+
+        ball.classList.remove("selected");
+
+        player.classList.add("selected");
+
+        selectedObject = player;
+
+        status.textContent =
+            getObjectName(player) +
+            " selected — press Dribble or drag the player.";
+
+    }
+
+
+    /*
+    ==========================================
     SAVE INITIAL POSITIONS
     ==========================================
     */
@@ -1267,6 +1276,15 @@
 
         });
 
+        /*
+        Reconnect the ball to the ball handler
+        after restoring positions.
+        */
+
+        if (ballHandler) {
+            moveBallWithPlayer(ballHandler);
+        }
+
     }
 
 
@@ -1287,7 +1305,7 @@
             fullCourtBtn.classList.remove("active");
 
             status.textContent =
-                "Half court — drag players or the ball.";
+                "Half court — tap a player, then press Dribble.";
 
         } else {
 
@@ -1298,7 +1316,7 @@
             halfCourtBtn.classList.remove("active");
 
             status.textContent =
-                "Full court — drag players or the ball.";
+                "Full court — tap a player, then press Dribble.";
 
         }
 
@@ -1325,20 +1343,36 @@
 
     function setBallHandler(player) {
 
-        if (
-            !player ||
-            player.classList.contains("defense")
-        ) {
+        if (!player) {
+
             status.textContent =
-                "Only an offensive player can dribble the ball.";
+                "Tap an offensive player first.";
 
             return;
+
         }
 
+        if (
+            player.classList.contains("defense")
+        ) {
+
+            status.textContent =
+                "A defender cannot dribble the ball.";
+
+            return;
+
+        }
+
+        /*
+        Remove old ball handler.
+        */
+
         if (ballHandler) {
+
             ballHandler.classList.remove(
                 "ball-handler"
             );
+
         }
 
         ballHandler = player;
@@ -1346,6 +1380,11 @@
         ballHandler.classList.add(
             "ball-handler"
         );
+
+        /*
+        Immediately put the ball beside
+        the selected player.
+        */
 
         moveBallWithPlayer(
             ballHandler
@@ -1356,12 +1395,11 @@
         );
 
         dribbleBtn.textContent =
-            "🏀 Dribbling: " +
-            getObjectName(ballHandler);
+            "🏀 Stop Dribbling";
 
         status.textContent =
             getObjectName(ballHandler) +
-            " is now the ball handler. Drag the player to move with the ball.";
+            " has the ball — drag the player.";
 
     }
 
@@ -1385,6 +1423,9 @@
         dribbleBtn.textContent =
             "🏀 Dribble";
 
+        status.textContent =
+            "Dribbling stopped. The ball is independent.";
+
     }
 
 
@@ -1394,15 +1435,14 @@
             getPosition(player);
 
         /*
-        Keep the ball slightly beside
-        the player's body.
+        Ball stays beside the player.
         */
 
         let ballX =
-            playerPosition.x + 2.8;
+            playerPosition.x + 3;
 
         let ballY =
-            playerPosition.y + 3.5;
+            playerPosition.y + 4;
 
         ballX =
             Math.max(
@@ -1425,23 +1465,38 @@
     }
 
 
+    /*
+    ==========================================
+    DRIBBLE BUTTON
+    ==========================================
+    */
+
     dribbleBtn.addEventListener(
         "click",
         () => {
+
+            /*
+            If already dribbling,
+            pressing button stops it.
+            */
 
             if (ballHandler) {
 
                 clearBallHandler();
 
-                status.textContent =
-                    "Dribbling stopped. The ball can now be moved independently.";
-
                 return;
+
             }
+
+            /*
+            IMPORTANT FIX:
+            Only an actual offensive player
+            can become the ball handler.
+            */
 
             if (
                 selectedObject &&
-                selectedObject.classList.contains("player")
+                selectedObject.classList.contains("offense")
             ) {
 
                 setBallHandler(
@@ -1453,7 +1508,7 @@
             }
 
             status.textContent =
-                "Select an offensive player first, then press Dribble.";
+                "Tap an offensive player first, then press Dribble.";
 
         }
     );
@@ -1575,7 +1630,7 @@
         status.textContent =
             "Recording \"" +
             savedPlayName +
-            "\" — move your players and ball.";
+            "\" — move players, ball, or dribble.";
 
     }
 
@@ -1702,7 +1757,10 @@
         }
 
         const elapsed =
-            (performance.now() - recordingStartTime) / 1000;
+            (
+                performance.now()
+                - recordingStartTime
+            ) / 1000;
 
         const position =
             getPosition(object);
@@ -1792,11 +1850,24 @@
         selectedObject =
             event.currentTarget;
 
-        isDragging = true;
+        /*
+        If the ball is selected,
+        clear player selection.
+        */
+
+        players.forEach(
+            player => {
+                player.classList.remove("selected");
+            }
+        );
+
+        ball.classList.remove("selected");
 
         selectedObject.classList.add(
             "selected"
         );
+
+        isDragging = true;
 
         selectedObject.setPointerCapture(
             event.pointerId
@@ -1832,12 +1903,16 @@
             court.getBoundingClientRect();
 
         let x =
-            ((event.clientX - courtRect.left)
-            / courtRect.width) * 100;
+            (
+                (event.clientX - courtRect.left)
+                / courtRect.width
+            ) * 100;
 
         let y =
-            ((event.clientY - courtRect.top)
-            / courtRect.height) * 100;
+            (
+                (event.clientY - courtRect.top)
+                / courtRect.height
+            ) * 100;
 
         x =
             Math.max(
@@ -1859,8 +1934,9 @@
 
 
         /*
-        If this player is the ball handler,
-        the ball follows automatically.
+        ==========================================
+        BALL HANDLER
+        ==========================================
         */
 
         if (
@@ -1915,10 +1991,27 @@
 
         isDragging = false;
 
+        /*
+        IMPORTANT:
+        Do NOT clear selectedObject here.
+
+        This is what allows:
+
+        TAP PLAYER
+        ↓
+        DRIBBLE
+
+        without losing the selection.
+        */
+
         selectedObject.classList.remove(
             "selected"
         );
 
+        /*
+        Keep the selected reference alive
+        for the Dribble button.
+        */
 
         if (isRecording) {
 
@@ -1927,12 +2020,20 @@
 
         } else {
 
-            status.textContent =
-                "Position updated. Keep designing your play.";
+            if (ballHandler === selectedObject) {
+
+                status.textContent =
+                    getObjectName(selectedObject) +
+                    " is dribbling. Keep moving.";
+
+            } else {
+
+                status.textContent =
+                    "Position updated.";
+
+            }
 
         }
-
-        selectedObject = null;
 
     }
 
@@ -1951,8 +2052,7 @@
         );
 
         /*
-        Clicking a player without dragging
-        also makes them the selected player.
+        A normal tap selects the player.
         */
 
         player.addEventListener(
@@ -1963,23 +2063,9 @@
                     return;
                 }
 
-                players.forEach(
-                    other =>
-                        other.classList.remove(
-                            "selected"
-                        )
+                selectPlayer(
+                    player
                 );
-
-                player.classList.add(
-                    "selected"
-                );
-
-                selectedObject =
-                    player;
-
-                status.textContent =
-                    getObjectName(player) +
-                    " selected.";
 
             }
         );
@@ -1989,7 +2075,7 @@
 
     /*
     ==========================================
-    BALL EVENT
+    BALL EVENTS
     ==========================================
     */
 
@@ -2007,6 +2093,14 @@
                 return;
             }
 
+            players.forEach(
+                player => {
+                    player.classList.remove(
+                        "selected"
+                    );
+                }
+            );
+
             ball.classList.add(
                 "selected"
             );
@@ -2015,7 +2109,7 @@
                 ball;
 
             status.textContent =
-                "Ball selected — drag it anywhere on the court.";
+                "Ball selected — drag it anywhere.";
 
         }
     );
@@ -2091,7 +2185,7 @@
 
     function runPlayback() {
 
-        if (!isPlaying) {
+        if (!isPlaying || isPaused) {
             return;
         }
 
@@ -2472,4 +2566,3 @@
 
 </body>
 </html>
-

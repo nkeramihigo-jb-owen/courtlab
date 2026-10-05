@@ -70,6 +70,15 @@
         background: #2563eb;
     }
 
+    button.recording {
+        background: #dc2626;
+    }
+
+    button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
     .court-wrapper {
         width: 100%;
         background: #1f2937;
@@ -183,14 +192,10 @@
     .three-point-left,
     .three-point-right {
         position: absolute;
-
         width: 42%;
         height: 88%;
-
         top: 6%;
-
         border: 3px solid white;
-
         border-radius: 50%;
     }
 
@@ -255,12 +260,6 @@
     .court.half-court .free-circle-left {
         left: 22%;
     }
-
-    /*
-    ==========================================
-    HALF COURT THREE POINT LINE
-    ==========================================
-    */
 
     .court.half-court .three-point-left {
         width: 84%;
@@ -344,6 +343,12 @@
         transform: translate(-50%, -50%);
     }
 
+    .ball.selected {
+        box-shadow:
+            0 0 0 4px rgba(255, 255, 255, 0.5),
+            0 5px 12px rgba(0, 0, 0, 0.4);
+    }
+
     /*
     ==========================================
     INFO
@@ -406,6 +411,155 @@
         font-size: 14px;
     }
 
+    /*
+    ==========================================
+    RECORDING PANEL
+    ==========================================
+    */
+
+    .recording-panel {
+        margin-top: 15px;
+
+        background: #1f2937;
+
+        padding: 18px;
+
+        border-radius: 12px;
+    }
+
+    .recording-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+
+    .recording-title {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .recording-time {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+    .recording-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .timeline {
+        background: #111827;
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .timeline-empty {
+        color: #6b7280;
+        font-size: 14px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .timeline-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+
+        padding: 9px 10px;
+
+        border-bottom: 1px solid #374151;
+
+        color: #d1d5db;
+
+        font-size: 13px;
+    }
+
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+
+    .timeline-player {
+        font-weight: bold;
+        color: white;
+    }
+
+    .timeline-time {
+        color: #60a5fa;
+        min-width: 55px;
+    }
+
+    .timeline-action {
+        color: #9ca3af;
+        flex: 1;
+    }
+
+    .recording-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    .recording-dot {
+        width: 9px;
+        height: 9px;
+        background: #ef4444;
+        border-radius: 50%;
+        animation: recordingPulse 1s infinite;
+    }
+
+    @keyframes recordingPulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.35;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .playback-progress {
+        width: 100%;
+        height: 5px;
+        background: #374151;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .playback-progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #2563eb;
+        transition: width 0.05s linear;
+    }
+
+    /*
+    ==========================================
+    FOOTER
+    ==========================================
+    */
+
+    .footer {
+        text-align: center;
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 25px;
+    }
+
     @media (max-width: 700px) {
 
         body {
@@ -428,8 +582,10 @@
             height: 20px;
         }
 
+        .timeline-item {
+            align-items: flex-start;
+        }
     }
-
 </style>
 
 
@@ -451,7 +607,6 @@
         </p>
 
     </div>
-
 
     <div class="controls">
 
@@ -480,6 +635,7 @@
         <button
             id="playBtn"
             type="button"
+            disabled
         >
             ▶ Play
         </button>
@@ -632,6 +788,8 @@
 </div>
 
 
+<!-- INFO -->
+
 <div class="info-panel">
 
     <div class="legend">
@@ -653,7 +811,6 @@
 
     </div>
 
-
     <div
         class="status"
         id="status"
@@ -664,9 +821,122 @@
 </div>
 
 
+<!-- RECORDING -->
+
+<div class="recording-panel">
+
+    <div class="recording-header">
+
+        <div>
+
+            <div class="recording-title">
+                🎬 Play Recording
+            </div>
+
+            <div
+                class="recording-time"
+                id="recordingTime"
+            >
+                0.0s
+            </div>
+
+        </div>
+
+        <div
+            id="recordingIndicator"
+            class="recording-indicator"
+            style="display:none;"
+        >
+            <span class="recording-dot"></span>
+            Recording
+        </div>
+
+    </div>
+
+
+    <div class="recording-controls">
+
+        <button
+            id="recordBtn"
+            type="button"
+        >
+            🔴 Record
+        </button>
+
+        <button
+            id="stopBtn"
+            type="button"
+            disabled
+        >
+            ⏹ Stop
+        </button>
+
+        <button
+            id="restartBtn"
+            type="button"
+            disabled
+        >
+            ↩ Restart
+        </button>
+
+        <button
+            id="pauseBtn"
+            type="button"
+            disabled
+        >
+            ⏸ Pause
+        </button>
+
+        <button
+            id="clearBtn"
+            type="button"
+            disabled
+        >
+            Clear Recording
+        </button>
+
+    </div>
+
+
+    <div class="playback-progress">
+
+        <div
+            class="playback-progress-bar"
+            id="playbackProgress"
+        ></div>
+
+    </div>
+
+
+    <div
+        class="timeline"
+        id="timeline"
+    >
+
+        <div class="timeline-empty">
+            No play recorded yet.
+            Press Record and start moving players.
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="footer">
+    CourtLab • Built by nkeramihigo-jb-owen
+</div>
+
+
 </div>
 
 <script>
+
+    /*
+    ==========================================
+    COURT ELEMENTS
+    ==========================================
+    */
 
     const court =
         document.getElementById("court");
@@ -692,10 +962,160 @@
     const status =
         document.getElementById("status");
 
+    const recordBtn =
+        document.getElementById("recordBtn");
+
+    const stopBtn =
+        document.getElementById("stopBtn");
+
+    const restartBtn =
+        document.getElementById("restartBtn");
+
+    const pauseBtn =
+        document.getElementById("pauseBtn");
+
+    const clearBtn =
+        document.getElementById("clearBtn");
+
+    const timeline =
+        document.getElementById("timeline");
+
+    const recordingTime =
+        document.getElementById("recordingTime");
+
+    const recordingIndicator =
+        document.getElementById("recordingIndicator");
+
+    const playbackProgress =
+        document.getElementById("playbackProgress");
+
+
+    /*
+    ==========================================
+    STATE
+    ==========================================
+    */
 
     let selectedObject = null;
 
     let isDragging = false;
+
+    let isRecording = false;
+
+    let isPlaying = false;
+
+    let isPaused = false;
+
+    let recordingStartTime = 0;
+
+    let recordingTimer = null;
+
+    let playbackFrame = null;
+
+    let playbackStartTime = 0;
+
+    let playbackPausedAt = 0;
+
+    let recordedEvents = [];
+
+    let initialPositions = {};
+
+    let lastRecordedTime = 0;
+
+
+    /*
+    ==========================================
+    OBJECT NAME
+    ==========================================
+    */
+
+    function getObjectName(object) {
+
+        if (object.classList.contains("ball")) {
+            return "Ball";
+        }
+
+        return "Player " + object.dataset.player;
+
+    }
+
+
+    /*
+    ==========================================
+    GET POSITION
+    ==========================================
+    */
+
+    function getPosition(object) {
+
+        return {
+            x: parseFloat(object.style.left),
+            y: parseFloat(object.style.top)
+        };
+
+    }
+
+
+    /*
+    ==========================================
+    SAVE INITIAL POSITIONS
+    ==========================================
+    */
+
+    function saveInitialPositions() {
+
+        initialPositions = {};
+
+        const objects = [
+            ...players,
+            ball
+        ];
+
+        objects.forEach(object => {
+
+            initialPositions[
+                getObjectName(object)
+            ] = getPosition(object);
+
+        });
+
+    }
+
+
+    /*
+    ==========================================
+    RESTORE INITIAL POSITIONS
+    ==========================================
+    */
+
+    function restoreInitialPositions() {
+
+        const objects = [
+            ...players,
+            ball
+        ];
+
+        objects.forEach(object => {
+
+            const name =
+                getObjectName(object);
+
+            const position =
+                initialPositions[name];
+
+            if (!position) {
+                return;
+            }
+
+            object.style.left =
+                position.x + "%";
+
+            object.style.top =
+                position.y + "%";
+
+        });
+
+    }
 
 
     /*
@@ -727,16 +1147,11 @@
 
             status.textContent =
                 "Full court — drag players or the ball.";
+
         }
 
     }
 
-
-    /*
-    ==========================================
-    BUTTONS
-    ==========================================
-    */
 
     fullCourtBtn.addEventListener(
         "click",
@@ -752,30 +1167,326 @@
 
     /*
     ==========================================
+    RECORDING TIMER
+    ==========================================
+    */
+
+    function updateRecordingTimer() {
+
+        if (!isRecording) {
+            return;
+        }
+
+        const elapsed =
+            (performance.now() - recordingStartTime) / 1000;
+
+        recordingTime.textContent =
+            elapsed.toFixed(1) + "s";
+
+    }
+
+
+    /*
+    ==========================================
+    START RECORDING
+    ==========================================
+    */
+
+    function startRecording() {
+
+        stopPlayback();
+
+        recordedEvents = [];
+
+        saveInitialPositions();
+
+        recordingStartTime =
+            performance.now();
+
+        lastRecordedTime = 0;
+
+        isRecording = true;
+
+        recordingIndicator.style.display =
+            "inline-flex";
+
+        recordBtn.classList.add(
+            "recording"
+        );
+
+        recordBtn.textContent =
+            "🔴 Recording...";
+
+        recordBtn.disabled = true;
+
+        stopBtn.disabled = false;
+
+        restartBtn.disabled = true;
+
+        pauseBtn.disabled = true;
+
+        clearBtn.disabled = false;
+
+        playBtn.disabled = true;
+
+        recordingTime.textContent =
+            "0.0s";
+
+        timeline.innerHTML = "";
+
+        const startingEvent =
+            document.createElement("div");
+
+        startingEvent.className =
+            "timeline-item";
+
+        startingEvent.innerHTML = `
+            <span class="timeline-time">0.0s</span>
+            <span class="timeline-player">All</span>
+            <span class="timeline-action">Starting positions saved</span>
+        `;
+
+        timeline.appendChild(
+            startingEvent
+        );
+
+        recordingTimer =
+            setInterval(
+                updateRecordingTimer,
+                50
+            );
+
+        status.textContent =
+            "Recording started — move your players and ball.";
+
+    }
+
+
+    /*
+    ==========================================
+    STOP RECORDING
+    ==========================================
+    */
+
+    function stopRecording() {
+
+        if (!isRecording) {
+            return;
+        }
+
+        isRecording = false;
+
+        clearInterval(
+            recordingTimer
+        );
+
+        recordingTimer = null;
+
+        recordingIndicator.style.display =
+            "none";
+
+        recordBtn.classList.remove(
+            "recording"
+        );
+
+        recordBtn.textContent =
+            "🔴 Record";
+
+        recordBtn.disabled = false;
+
+        stopBtn.disabled = true;
+
+        restartBtn.disabled =
+            recordedEvents.length === 0;
+
+        pauseBtn.disabled = true;
+
+        clearBtn.disabled =
+            recordedEvents.length === 0;
+
+        playBtn.disabled =
+            recordedEvents.length === 0;
+
+        status.textContent =
+            recordedEvents.length > 0
+                ? "Play recorded — press Play to review it."
+                : "No movement was recorded.";
+
+    }
+
+
+    /*
+    ==========================================
+    RECORD MOVEMENT
+    ==========================================
+    */
+
+    function recordMovement(object) {
+
+        if (!isRecording) {
+            return;
+        }
+
+        const now =
+            performance.now();
+
+        const elapsed =
+            (now - recordingStartTime) / 1000;
+
+        /*
+        Avoid creating hundreds of events
+        while the pointer is moving.
+        */
+
+        if (
+            elapsed - lastRecordedTime < 0.05
+        ) {
+            return;
+        }
+
+        lastRecordedTime = elapsed;
+
+        const position =
+            getPosition(object);
+
+        recordedEvents.push({
+
+            time: elapsed,
+
+            object: getObjectName(object),
+
+            x: position.x,
+
+            y: position.y
+
+        });
+
+        addTimelineEvent(
+            recordedEvents[
+                recordedEvents.length - 1
+            ]
+        );
+
+    }
+
+
+    /*
+    ==========================================
+    FINAL POSITION
+    ==========================================
+    */
+
+    function recordFinalMovement(object) {
+
+        if (!isRecording) {
+            return;
+        }
+
+        const elapsed =
+            (performance.now() - recordingStartTime) / 1000;
+
+        const position =
+            getPosition(object);
+
+        const event = {
+
+            time: elapsed,
+
+            object: getObjectName(object),
+
+            x: position.x,
+
+            y: position.y
+
+        };
+
+        recordedEvents.push(event);
+
+        addTimelineEvent(event);
+
+    }
+
+
+    /*
+    ==========================================
+    TIMELINE
+    ==========================================
+    */
+
+    function addTimelineEvent(event) {
+
+        const empty =
+            timeline.querySelector(
+                ".timeline-empty"
+            );
+
+        if (empty) {
+            empty.remove();
+        }
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "timeline-item";
+
+        item.innerHTML = `
+            <span class="timeline-time">
+                ${event.time.toFixed(1)}s
+            </span>
+
+            <span class="timeline-player">
+                ${event.object}
+            </span>
+
+            <span class="timeline-action">
+                MOVE
+            </span>
+        `;
+
+        timeline.appendChild(item);
+
+        timeline.scrollTop =
+            timeline.scrollHeight;
+
+    }
+
+
+    /*
+    ==========================================
     DRAGGING
     ==========================================
     */
 
     function startDragging(event) {
 
+        if (isPlaying) {
+            return;
+        }
+
         selectedObject =
             event.currentTarget;
 
         isDragging = true;
 
-        selectedObject.classList.add("selected");
+        selectedObject.classList.add(
+            "selected"
+        );
 
         selectedObject.setPointerCapture(
             event.pointerId
         );
 
-        const playerName =
-            selectedObject.dataset.player || "Ball";
+        const objectName =
+            getObjectName(selectedObject);
 
         status.textContent =
-            "Moving " + playerName;
+            isRecording
+                ? "Recording " + objectName + " movement..."
+                : "Moving " + objectName;
 
         event.preventDefault();
+
     }
 
 
@@ -783,29 +1494,22 @@
 
         if (
             !isDragging ||
-            !selectedObject
+            !selectedObject ||
+            isPlaying
         ) {
             return;
         }
 
-
         const courtRect =
             court.getBoundingClientRect();
-
 
         let x =
             ((event.clientX - courtRect.left)
             / courtRect.width) * 100;
 
-
         let y =
             ((event.clientY - courtRect.top)
             / courtRect.height) * 100;
-
-
-        /*
-        Keep objects inside the court.
-        */
 
         x =
             Math.max(
@@ -813,20 +1517,21 @@
                 Math.min(97, x)
             );
 
-
         y =
             Math.max(
                 5,
                 Math.min(95, y)
             );
 
-
         selectedObject.style.left =
             x + "%";
 
-
         selectedObject.style.top =
             y + "%";
+
+        recordMovement(
+            selectedObject
+        );
 
     }
 
@@ -837,18 +1542,24 @@
             return;
         }
 
+        if (isRecording) {
+
+            recordFinalMovement(
+                selectedObject
+            );
+
+        }
 
         isDragging = false;
-
 
         selectedObject.classList.remove(
             "selected"
         );
 
-
         status.textContent =
-            "Position updated. Keep designing your play.";
-
+            isRecording
+                ? "Movement recorded. Continue building the play."
+                : "Position updated. Keep designing your play.";
 
         selectedObject = null;
 
@@ -903,6 +1614,408 @@
 
     /*
     ==========================================
+    PLAYBACK
+    ==========================================
+    */
+
+    function startPlayback() {
+
+        if (
+            recordedEvents.length === 0 ||
+            isRecording
+        ) {
+            return;
+        }
+
+        stopPlayback();
+
+        restoreInitialPositions();
+
+        isPlaying = true;
+
+        isPaused = false;
+
+        playbackPausedAt = 0;
+
+        playbackStartTime =
+            performance.now();
+
+        playBtn.textContent =
+            "▶ Playing...";
+
+        playBtn.disabled = true;
+
+        restartBtn.disabled = false;
+
+        pauseBtn.disabled = false;
+
+        pauseBtn.textContent =
+            "⏸ Pause";
+
+        status.textContent =
+            "Playing your recorded play...";
+
+        runPlayback();
+
+    }
+
+
+    function runPlayback() {
+
+        if (!isPlaying) {
+            return;
+        }
+
+        const elapsed =
+            (
+                performance.now()
+                - playbackStartTime
+            ) / 1000;
+
+        const totalDuration =
+            recordedEvents.length > 0
+                ? recordedEvents[
+                    recordedEvents.length - 1
+                ].time
+                : 0;
+
+        let progress =
+            totalDuration > 0
+                ? (elapsed / totalDuration) * 100
+                : 100;
+
+        progress =
+            Math.max(
+                0,
+                Math.min(100, progress)
+            );
+
+        playbackProgress.style.width =
+            progress + "%";
+
+
+        /*
+        Apply every event whose time
+        has arrived.
+        */
+
+        recordedEvents.forEach(event => {
+
+            if (event.time <= elapsed) {
+
+                const object =
+                    findObject(
+                        event.object
+                    );
+
+                if (!object) {
+                    return;
+                }
+
+                object.style.left =
+                    event.x + "%";
+
+                object.style.top =
+                    event.y + "%";
+
+            }
+
+        });
+
+
+        if (
+            elapsed >= totalDuration
+        ) {
+
+            finishPlayback();
+
+            return;
+
+        }
+
+
+        playbackFrame =
+            requestAnimationFrame(
+                runPlayback
+            );
+
+    }
+
+
+    /*
+    ==========================================
+    FIND OBJECT
+    ==========================================
+    */
+
+    function findObject(name) {
+
+        if (name === "Ball") {
+            return ball;
+        }
+
+        const playerNumber =
+            name.replace(
+                "Player ",
+                ""
+            );
+
+        return document.querySelector(
+            `.player[data-player="${playerNumber}"]`
+        );
+
+    }
+
+
+    /*
+    ==========================================
+    PAUSE
+    ==========================================
+    */
+
+    function pausePlayback() {
+
+        if (!isPlaying) {
+            return;
+        }
+
+        if (!isPaused) {
+
+            isPaused = true;
+
+            playbackPausedAt =
+                (
+                    performance.now()
+                    - playbackStartTime
+                ) / 1000;
+
+            cancelAnimationFrame(
+                playbackFrame
+            );
+
+            pauseBtn.textContent =
+                "▶ Resume";
+
+            status.textContent =
+                "Playback paused.";
+
+        } else {
+
+            isPaused = false;
+
+            playbackStartTime =
+                performance.now()
+                - (
+                    playbackPausedAt
+                    * 1000
+                );
+
+            pauseBtn.textContent =
+                "⏸ Pause";
+
+            status.textContent =
+                "Playback resumed.";
+
+            runPlayback();
+
+        }
+
+    }
+
+
+    /*
+    ==========================================
+    FINISH PLAYBACK
+    ==========================================
+    */
+
+    function finishPlayback() {
+
+        isPlaying = false;
+
+        isPaused = false;
+
+        cancelAnimationFrame(
+            playbackFrame
+        );
+
+        playbackFrame = null;
+
+        playbackProgress.style.width =
+            "100%";
+
+        playBtn.disabled = false;
+
+        playBtn.textContent =
+            "▶ Play";
+
+        pauseBtn.disabled = true;
+
+        pauseBtn.textContent =
+            "⏸ Pause";
+
+        restartBtn.disabled = false;
+
+        status.textContent =
+            "Playback finished. Press Play to watch it again.";
+
+    }
+
+
+    /*
+    ==========================================
+    STOP PLAYBACK
+    ==========================================
+    */
+
+    function stopPlayback() {
+
+        isPlaying = false;
+
+        isPaused = false;
+
+        cancelAnimationFrame(
+            playbackFrame
+        );
+
+        playbackFrame = null;
+
+        pauseBtn.disabled = true;
+
+        pauseBtn.textContent =
+            "⏸ Pause";
+
+        if (recordedEvents.length > 0) {
+            playBtn.disabled = false;
+        }
+
+    }
+
+
+    /*
+    ==========================================
+    RESTART
+    ==========================================
+    */
+
+    restartBtn.addEventListener(
+        "click",
+        () => {
+
+            if (
+                recordedEvents.length === 0
+            ) {
+                return;
+            }
+
+            stopPlayback();
+
+            restoreInitialPositions();
+
+            playbackProgress.style.width =
+                "0%";
+
+            status.textContent =
+                "Play reset. Press Play to review it.";
+
+        }
+    );
+
+
+    /*
+    ==========================================
+    PLAY
+    ==========================================
+    */
+
+    playBtn.addEventListener(
+        "click",
+        startPlayback
+    );
+
+
+    /*
+    ==========================================
+    PAUSE
+    ==========================================
+    */
+
+    pauseBtn.addEventListener(
+        "click",
+        pausePlayback
+    );
+
+
+    /*
+    ==========================================
+    RECORD BUTTON
+    ==========================================
+    */
+
+    recordBtn.addEventListener(
+        "click",
+        startRecording
+    );
+
+
+    /*
+    ==========================================
+    STOP BUTTON
+    ==========================================
+    */
+
+    stopBtn.addEventListener(
+        "click",
+        stopRecording
+    );
+
+
+    /*
+    ==========================================
+    CLEAR RECORDING
+    ==========================================
+    */
+
+    clearBtn.addEventListener(
+        "click",
+        () => {
+
+            stopPlayback();
+
+            recordedEvents = [];
+
+            initialPositions = {};
+
+            recordingTime.textContent =
+                "0.0s";
+
+            playbackProgress.style.width =
+                "0%";
+
+            timeline.innerHTML = `
+                <div class="timeline-empty">
+                    No play recorded yet.
+                    Press Record and start moving players.
+                </div>
+            `;
+
+            playBtn.disabled = true;
+
+            restartBtn.disabled = true;
+
+            pauseBtn.disabled = true;
+
+            clearBtn.disabled = true;
+
+            status.textContent =
+                "Recording cleared. You can design a new play.";
+
+        }
+    );
+
+
+    /*
+    ==========================================
     RESET
     ==========================================
     */
@@ -919,19 +2032,11 @@
 
     /*
     ==========================================
-    PLAYBACK
+    INITIAL SETUP
     ==========================================
     */
 
-    playBtn.addEventListener(
-        "click",
-        () => {
-
-            status.textContent =
-                "Playback engine coming next 🏀";
-
-        }
-    );
+    saveInitialPositions();
 
 </script>
 

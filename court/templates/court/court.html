@@ -74,6 +74,10 @@
         background: #dc2626;
     }
 
+    button.dribbling {
+        background: #16a34a;
+    }
+
     button:disabled {
         opacity: 0.45;
         cursor: not-allowed;
@@ -240,7 +244,21 @@
     */
 
     .court.half-court {
+        /*
+        Keep the correct half-court proportions,
+        but limit the desktop height so it fits
+        comfortably on a PC screen.
+        */
+
+        width: min(
+            100%,
+            calc((100vh - 330px) * 0.94)
+        );
+
         aspect-ratio: 47 / 50;
+
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .court.half-court .half-court-line,
@@ -318,6 +336,12 @@
             0 6px 15px rgba(0, 0, 0, 0.4);
     }
 
+    .player.ball-handler {
+        box-shadow:
+            0 0 0 4px #f97316,
+            0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
     /*
     ==========================================
     BALL
@@ -339,6 +363,24 @@
         z-index: 20;
 
         cursor: grab;
+
+        transform: translate(-50%, -50%);
+    }
+
+    /*
+    Larger invisible interaction area
+    makes the ball much easier to grab.
+    */
+
+    .ball::before {
+        content: "";
+        position: absolute;
+
+        width: 44px;
+        height: 44px;
+
+        left: 50%;
+        top: 50%;
 
         transform: translate(-50%, -50%);
     }
@@ -444,6 +486,70 @@
     .recording-time {
         color: #9ca3af;
         font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .play-name-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .play-name-row label {
+        font-size: 14px;
+        color: #d1d5db;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .play-name-input {
+        flex: 1;
+        min-width: 0;
+
+        background: #111827;
+        color: white;
+
+        border: 1px solid #374151;
+        border-radius: 8px;
+
+        padding: 11px 12px;
+
+        outline: none;
+    }
+
+    .play-name-input:focus {
+        border-color: #2563eb;
+    }
+
+    .recording-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #fca5a5;
+        font-size: 13px;
+    }
+
+    .recording-dot {
+        width: 9px;
+        height: 9px;
+        background: #ef4444;
+        border-radius: 50%;
+        animation: recordingPulse 1s infinite;
+    }
+
+    @keyframes recordingPulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.35;
+        }
+
+        100% {
+            opacity: 1;
+        }
     }
 
     .recording-controls {
@@ -458,6 +564,7 @@
         padding: 12px;
         max-height: 220px;
         overflow-y: auto;
+        margin-top: 15px;
     }
 
     .timeline-empty {
@@ -501,34 +608,11 @@
         flex: 1;
     }
 
-    .recording-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        color: #fca5a5;
+    .play-title-display {
+        color: #60a5fa;
         font-size: 13px;
-    }
-
-    .recording-dot {
-        width: 9px;
-        height: 9px;
-        background: #ef4444;
-        border-radius: 50%;
-        animation: recordingPulse 1s infinite;
-    }
-
-    @keyframes recordingPulse {
-        0% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.35;
-        }
-
-        100% {
-            opacity: 1;
-        }
+        font-weight: bold;
+        margin-bottom: 8px;
     }
 
     .playback-progress {
@@ -560,6 +644,12 @@
         margin-top: 25px;
     }
 
+    /*
+    ==========================================
+    MOBILE
+    ==========================================
+    */
+
     @media (max-width: 700px) {
 
         body {
@@ -569,6 +659,15 @@
         .header {
             flex-direction: column;
             align-items: flex-start;
+        }
+
+        /*
+        On mobile, return to full width.
+        This keeps the behavior you already liked.
+        */
+
+        .court.half-court {
+            width: 100%;
         }
 
         .player {
@@ -582,10 +681,20 @@
             height: 20px;
         }
 
+        .play-name-row {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .play-name-input {
+            width: 100%;
+        }
+
         .timeline-item {
             align-items: flex-start;
         }
     }
+
 </style>
 
 
@@ -821,7 +930,7 @@
 </div>
 
 
-<!-- RECORDING -->
+<!-- RECORDING PANEL -->
 
 <div class="recording-panel">
 
@@ -850,6 +959,39 @@
             <span class="recording-dot"></span>
             Recording
         </div>
+
+    </div>
+
+
+    <!-- PLAY NAME -->
+
+    <div class="play-name-row">
+
+        <label for="playName">
+            Play Name
+        </label>
+
+        <input
+            type="text"
+            id="playName"
+            class="play-name-input"
+            placeholder="Example: Horns Entry"
+            maxlength="80"
+        >
+
+    </div>
+
+
+    <!-- DRIBBLE -->
+
+    <div class="recording-controls" style="margin-bottom:10px;">
+
+        <button
+            id="dribbleBtn"
+            type="button"
+        >
+            🏀 Dribble
+        </button>
 
     </div>
 
@@ -977,6 +1119,12 @@
     const clearBtn =
         document.getElementById("clearBtn");
 
+    const dribbleBtn =
+        document.getElementById("dribbleBtn");
+
+    const playName =
+        document.getElementById("playName");
+
     const timeline =
         document.getElementById("timeline");
 
@@ -1021,6 +1169,10 @@
     let initialPositions = {};
 
     let lastRecordedTime = 0;
+
+    let ballHandler = null;
+
+    let savedPlayName = "Untitled Play";
 
 
     /*
@@ -1167,6 +1319,148 @@
 
     /*
     ==========================================
+    DRIBBLE / BALL HANDLER
+    ==========================================
+    */
+
+    function setBallHandler(player) {
+
+        if (
+            !player ||
+            player.classList.contains("defense")
+        ) {
+            status.textContent =
+                "Only an offensive player can dribble the ball.";
+
+            return;
+        }
+
+        if (ballHandler) {
+            ballHandler.classList.remove(
+                "ball-handler"
+            );
+        }
+
+        ballHandler = player;
+
+        ballHandler.classList.add(
+            "ball-handler"
+        );
+
+        moveBallWithPlayer(
+            ballHandler
+        );
+
+        dribbleBtn.classList.add(
+            "dribbling"
+        );
+
+        dribbleBtn.textContent =
+            "🏀 Dribbling: " +
+            getObjectName(ballHandler);
+
+        status.textContent =
+            getObjectName(ballHandler) +
+            " is now the ball handler. Drag the player to move with the ball.";
+
+    }
+
+
+    function clearBallHandler() {
+
+        if (ballHandler) {
+
+            ballHandler.classList.remove(
+                "ball-handler"
+            );
+
+        }
+
+        ballHandler = null;
+
+        dribbleBtn.classList.remove(
+            "dribbling"
+        );
+
+        dribbleBtn.textContent =
+            "🏀 Dribble";
+
+    }
+
+
+    function moveBallWithPlayer(player) {
+
+        const playerPosition =
+            getPosition(player);
+
+        /*
+        Keep the ball slightly beside
+        the player's body.
+        */
+
+        let ballX =
+            playerPosition.x + 2.8;
+
+        let ballY =
+            playerPosition.y + 3.5;
+
+        ballX =
+            Math.max(
+                3,
+                Math.min(97, ballX)
+            );
+
+        ballY =
+            Math.max(
+                5,
+                Math.min(95, ballY)
+            );
+
+        ball.style.left =
+            ballX + "%";
+
+        ball.style.top =
+            ballY + "%";
+
+    }
+
+
+    dribbleBtn.addEventListener(
+        "click",
+        () => {
+
+            if (ballHandler) {
+
+                clearBallHandler();
+
+                status.textContent =
+                    "Dribbling stopped. The ball can now be moved independently.";
+
+                return;
+            }
+
+            if (
+                selectedObject &&
+                selectedObject.classList.contains("player")
+            ) {
+
+                setBallHandler(
+                    selectedObject
+                );
+
+                return;
+
+            }
+
+            status.textContent =
+                "Select an offensive player first, then press Dribble.";
+
+        }
+    );
+
+
+    /*
+    ==========================================
     RECORDING TIMER
     ==========================================
     */
@@ -1178,7 +1472,10 @@
         }
 
         const elapsed =
-            (performance.now() - recordingStartTime) / 1000;
+            (
+                performance.now()
+                - recordingStartTime
+            ) / 1000;
 
         recordingTime.textContent =
             elapsed.toFixed(1) + "s";
@@ -1197,6 +1494,10 @@
         stopPlayback();
 
         recordedEvents = [];
+
+        savedPlayName =
+            playName.value.trim()
+            || "Untitled Play";
 
         saveInitialPositions();
 
@@ -1229,10 +1530,25 @@
 
         playBtn.disabled = true;
 
+        playName.disabled = true;
+
         recordingTime.textContent =
             "0.0s";
 
         timeline.innerHTML = "";
+
+        const titleEvent =
+            document.createElement("div");
+
+        titleEvent.className =
+            "play-title-display";
+
+        titleEvent.textContent =
+            "🎬 " + savedPlayName;
+
+        timeline.appendChild(
+            titleEvent
+        );
 
         const startingEvent =
             document.createElement("div");
@@ -1257,7 +1573,9 @@
             );
 
         status.textContent =
-            "Recording started — move your players and ball.";
+            "Recording \"" +
+            savedPlayName +
+            "\" — move your players and ball.";
 
     }
 
@@ -1307,9 +1625,13 @@
         playBtn.disabled =
             recordedEvents.length === 0;
 
+        playName.disabled = false;
+
         status.textContent =
             recordedEvents.length > 0
-                ? "Play recorded — press Play to review it."
+                ? "\"" +
+                    savedPlayName +
+                    "\" recorded — press Play to review it."
                 : "No movement was recorded.";
 
     }
@@ -1333,11 +1655,6 @@
         const elapsed =
             (now - recordingStartTime) / 1000;
 
-        /*
-        Avoid creating hundreds of events
-        while the pointer is moving.
-        */
-
         if (
             elapsed - lastRecordedTime < 0.05
         ) {
@@ -1349,7 +1666,7 @@
         const position =
             getPosition(object);
 
-        recordedEvents.push({
+        const event = {
 
             time: elapsed,
 
@@ -1359,12 +1676,14 @@
 
             y: position.y
 
-        });
+        };
+
+        recordedEvents.push(
+            event
+        );
 
         addTimelineEvent(
-            recordedEvents[
-                recordedEvents.length - 1
-            ]
+            event
         );
 
     }
@@ -1372,7 +1691,7 @@
 
     /*
     ==========================================
-    FINAL POSITION
+    RECORD FINAL POSITION
     ==========================================
     */
 
@@ -1400,9 +1719,13 @@
 
         };
 
-        recordedEvents.push(event);
+        recordedEvents.push(
+            event
+        );
 
-        addTimelineEvent(event);
+        addTimelineEvent(
+            event
+        );
 
     }
 
@@ -1444,7 +1767,9 @@
             </span>
         `;
 
-        timeline.appendChild(item);
+        timeline.appendChild(
+            item
+        );
 
         timeline.scrollTop =
             timeline.scrollHeight;
@@ -1482,8 +1807,11 @@
 
         status.textContent =
             isRecording
-                ? "Recording " + objectName + " movement..."
-                : "Moving " + objectName;
+                ? "Recording " +
+                    objectName +
+                    " movement..."
+                : "Moving " +
+                    objectName;
 
         event.preventDefault();
 
@@ -1529,6 +1857,31 @@
         selectedObject.style.top =
             y + "%";
 
+
+        /*
+        If this player is the ball handler,
+        the ball follows automatically.
+        */
+
+        if (
+            ballHandler === selectedObject
+        ) {
+
+            moveBallWithPlayer(
+                selectedObject
+            );
+
+            if (isRecording) {
+
+                recordMovement(
+                    ball
+                );
+
+            }
+
+        }
+
+
         recordMovement(
             selectedObject
         );
@@ -1548,6 +1901,16 @@
                 selectedObject
             );
 
+            if (
+                ballHandler === selectedObject
+            ) {
+
+                recordFinalMovement(
+                    ball
+                );
+
+            }
+
         }
 
         isDragging = false;
@@ -1556,10 +1919,18 @@
             "selected"
         );
 
-        status.textContent =
-            isRecording
-                ? "Movement recorded. Continue building the play."
-                : "Position updated. Keep designing your play.";
+
+        if (isRecording) {
+
+            status.textContent =
+                "Movement recorded. Continue building the play.";
+
+        } else {
+
+            status.textContent =
+                "Position updated. Keep designing your play.";
+
+        }
 
         selectedObject = null;
 
@@ -1579,6 +1950,40 @@
             startDragging
         );
 
+        /*
+        Clicking a player without dragging
+        also makes them the selected player.
+        */
+
+        player.addEventListener(
+            "click",
+            () => {
+
+                if (isPlaying) {
+                    return;
+                }
+
+                players.forEach(
+                    other =>
+                        other.classList.remove(
+                            "selected"
+                        )
+                );
+
+                player.classList.add(
+                    "selected"
+                );
+
+                selectedObject =
+                    player;
+
+                status.textContent =
+                    getObjectName(player) +
+                    " selected.";
+
+            }
+        );
+
     });
 
 
@@ -1591,6 +1996,28 @@
     ball.addEventListener(
         "pointerdown",
         startDragging
+    );
+
+
+    ball.addEventListener(
+        "click",
+        () => {
+
+            if (isPlaying) {
+                return;
+            }
+
+            ball.classList.add(
+                "selected"
+            );
+
+            selectedObject =
+                ball;
+
+            status.textContent =
+                "Ball selected — drag it anywhere on the court.";
+
+        }
     );
 
 
@@ -1653,7 +2080,9 @@
             "⏸ Pause";
 
         status.textContent =
-            "Playing your recorded play...";
+            "Playing \"" +
+            savedPlayName +
+            "\"...";
 
         runPlayback();
 
@@ -1693,11 +2122,6 @@
         playbackProgress.style.width =
             progress + "%";
 
-
-        /*
-        Apply every event whose time
-        has arrived.
-        */
 
         recordedEvents.forEach(event => {
 
@@ -1857,7 +2281,9 @@
         restartBtn.disabled = false;
 
         status.textContent =
-            "Playback finished. Press Play to watch it again.";
+            "\"" +
+            savedPlayName +
+            "\" finished. Press Play to watch it again.";
 
     }
 
@@ -1916,7 +2342,9 @@
                 "0%";
 
             status.textContent =
-                "Play reset. Press Play to review it.";
+                "\"" +
+                savedPlayName +
+                "\" reset. Press Play to review it.";
 
         }
     );
@@ -1948,7 +2376,7 @@
 
     /*
     ==========================================
-    RECORD BUTTON
+    RECORD
     ==========================================
     */
 
@@ -1960,7 +2388,7 @@
 
     /*
     ==========================================
-    STOP BUTTON
+    STOP
     ==========================================
     */
 
@@ -2007,6 +2435,8 @@
 
             clearBtn.disabled = true;
 
+            playName.disabled = false;
+
             status.textContent =
                 "Recording cleared. You can design a new play.";
 
@@ -2042,3 +2472,4 @@
 
 </body>
 </html>
+
